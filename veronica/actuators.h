@@ -1,9 +1,12 @@
 
 /**********************************/
-/*                                */
+/*                                */ 
 /*          Arm Commands          */
 /*                                */
 /**********************************/
+
+//RCServo0 --> Raise + Lower
+//RCservo1 --> Pincer Open + Close
 
 /*Arm Raise*/
 void raiseChute(){

@@ -107,7 +107,7 @@ void loop() {
         delay(1000);
         openPincer();
 
-        /*if(stuck) shake*/ //maybe add in l8er if we decide too
+        /*if(stuck) shake*/ //maybe add in l8er if we decide to
         
       } break;
       
