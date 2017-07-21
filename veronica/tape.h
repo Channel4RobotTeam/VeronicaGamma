@@ -2,7 +2,7 @@
  *  Veronica
  *  July 2017
  *  
- *  Tape follows along competition surface and around pool
+ *  Tape follows along competition surface and around tank
  */
 
 #include "constants.h" 
@@ -12,7 +12,8 @@
 void tapeFollow(Menu* menu);
 void aroundTank(Menu* menu);
 bool reachedTank();
-int getDistance();
+double getDistance();
+void recoverLostTape(Menu* menu, int currentError, int lastError);
 
 /* TAPE FOLLOWING VARIABLES */
 int lastErr = 0;
@@ -23,8 +24,10 @@ int leftQRD;
 int rightQRD;
 int sideQRD;
 
+/* DISTANCE TRACKING VARIABLES */
 int wheelQRD;
 int wheelRevolutions = 0;
+double distance = 0;
 
 /* TANK VARIABLES */
 int lastTickCount = 0;
@@ -39,7 +42,7 @@ void tapeFollow(Menu* menu) {
     
     /* Press STOP to switch to menu */
     if (stopbutton()) { 
-      delay(100); 
+      delay(1000); 
       if (stopbutton()) { break; } 
     }
 
@@ -47,6 +50,7 @@ void tapeFollow(Menu* menu) {
     leftQRD = analogRead(LEFT_QRD);
     rightQRD = analogRead(RIGHT_QRD);
     sideQRD = analogRead(SIDE_QRD);
+    wheelQRD = analogRead(WHEEL_QRD);
 
     /* ERROR */
     int currErr = 0;
@@ -94,6 +98,13 @@ void tapeFollow(Menu* menu) {
       displayCount = 0; /* RESET */
     }
 
+    /* When wheel QRD sees white tape */
+    if(wheelQRD < THRESH_WHEEL && (currCount - wheelRevolutions) > 500) {
+      wheelRevolutions = wheelRevolutions + 1;
+      double circumference = 2 * PI * WHEEL_RADIUS;
+      distance = wheelRevolutions * circumference;
+    }
+  
     lastErr = currErr;
     lastCount = currCount;
   }
@@ -114,18 +125,19 @@ void aroundTank(Menu* menu) {
     
     /* Press STOP to switch to menu */
     if (stopbutton()) { 
-       break;  
+       delay(1000);
+       if(stopbutton()) { break; }
     }
 
     /* ERROR */
     int currErr = 0;
-    if (leftQRD < menu->thresh && rightQRD > menu->thresh) { /* SLIGHTLY LEFT OF TAPE  -> desired position */ 
+    if (leftQRD < menu->thresh && rightQRD > menu->thresh) { /* SLIGHTLY LEFT OF TAPE */ 
       currErr = -1; 
     } 
-    else if (leftQRD > menu->thresh && rightQRD > menu->thresh) { /* ON TAPE -> right of desired position */
+    else if (leftQRD > menu->thresh && rightQRD > menu->thresh) { /* ON TAPE */
       currErr = 0;
     }
-    else if (leftQRD > menu->thresh && rightQRD < menu->thresh) { /* SLIGHTLY RIGHT OF TAPE -> very right of desired position */ 
+    else if (leftQRD > menu->thresh && rightQRD < menu->thresh) { /* SLIGHTLY RIGHT OF TAPE */ 
       currErr = 1; 
     } 
     else if (leftQRD < menu->thresh && rightQRD < menu->thresh) { /* COMPLETELY OFF TAPE */
@@ -177,14 +189,11 @@ bool reachedTank() {
   return reachedTankVar;
 }
 
-int getDistance() {
-  /* Read Inputs */
-  wheelQRD = analogRead(WHEEL_QRD);
-
-  if(wheelQRD > THRESH_WHEEL) {
-    wheelRevolutions = wheelRevolutions + 1;
-  }
+double getDistance() {
+  return distance;
 }
 
-
+void recoverLostTape(Menu* menu, int currentError, int lastError) {
+  
+}
 
