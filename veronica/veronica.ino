@@ -94,19 +94,29 @@ void loop() {
       } break;
       
       case 5: { // TANK STAGE
-        
+
+        /* CALL MENU */
         displayMenu(menu);
 
-        /*Object Retrieval Sequence*/
-        raiseArm();
-        delay(500);
-        closePincer();
-        delay(1500);
-        lowerArm();
-        delay(1000);
-        openPincer();
+        int tickCount = 0;
 
-        /*if(stuck) shake*/ //maybe add in l8er if we decide to
+        while (tickCount < 6) {
+
+          /* GO TO NEXT TICK */
+          aroundTank(menu); 
+          tickCount++;
+          
+          /* PICK UP AGENT */
+          raiseArm();
+          delay(500);
+          closePincer();
+          delay(1500);
+          lowerArm();
+          delay(1000);
+          openPincer();
+          shake();  // might be unnecessary
+          
+        }
         
       } break;
       

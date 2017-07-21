@@ -3,7 +3,7 @@
 
 #include "constants.h"
 
-class Menu{
+class Menu {
   public:
     int velocity;
     int kp;
@@ -15,7 +15,7 @@ class Menu{
     int thresh;
     int thresh_side;
     int numMenuItems;
-    String menuItemNames[9] = {"vel", "kp", "ki", "kd", "kp_circle", "ki_circle", "kd_circle", "thresh", "thresh_side"};
+    String menuItemNames[9] = {"vel", "kp", "ki", "kd", "kp_c", "ki_c", "kd_c", "thresh", "thresh_s"};
     Menu(){
       velocity = VELOCITY;
       kp = KP;
