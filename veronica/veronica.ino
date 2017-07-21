@@ -1,3 +1,19 @@
+/********************************/
+/*                              */
+/*          THE BRAIN!          */
+/*                              */
+/********************************/
+
+/*
+ * 
+ * Channel 4 News Team
+ * Veronica
+ * July 2017
+ * 
+ * Includes startup code and directs the robot's actions.
+ * 
+ */
+
 #include <phys253.h>
 #include <LiquidCrystal.h>
 
@@ -17,72 +33,23 @@ void setup() {
 }
 
 void loop() {
+
+  displayMenu(menu);
     
-    switch (command) {
-      
-      case 0: { // FULL COURSE
-        
-      } break;
-      
-      case 1: { // TAPE FOLLOW
-        
-        /* CALL MENU */
-        displayMenu(menu);
-        /* TAPE FOLLOW */
-        tapeFollow(menu);
-        
-      } break;
-      
-      case 2: { // CIRCLE FOLLOW
-        
-        /* CALL MENU */
-        displayMenu(menu);
-        /* TAPE FOLLOW */
-        aroundTank(menu);
-        
-      } break;
-      
-      case 3: { // GATE STAGE
-        
-      } break;
-      
-      case 4: { // RAMP STAGE
-        
-      } break;
-      
-      case 5: { // TANK STAGE
+  switch (command) {
+    
+    case 0: { /* RUN FULL COURSE */
+      /* TODO combine everything!!! */
+    } break;
+    case 1: { tapeFollow(menu); } break; /* TAPE FOLLOW */
+    case 2: { aroundTank(menu); } break; /* CIRCLE FOLLOW */
+    case 3: { gateStage(); } break; /* GATE STAGE */
+    case 4: { rampStage(); } break; /* RAMP STAGE */
+    case 5: { tankStage(); } break; /* TANK STAGE */
+    case 6: { lineStage(); } break; /* LINE STAGE */
+  }
 
-        /* CALL MENU */
-        displayMenu(menu);
-
-        int tickCount = 0;
-
-        while (tickCount < 6) {
-
-          /* GO TO NEXT TICK */
-          aroundTank(menu); 
-          tickCount++;
-          
-          /* PICK UP AGENT */
-          raiseArm();
-          delay(500);
-          closePincer();
-          delay(1500);
-          lowerArm();
-          delay(1000);
-          openPincer();
-          shake();  // might be unnecessary
-          
-        }
-        
-      } break;
-      
-      case 6: { // LINE STAGE
-        
-      } break;
-    }
-
-    getUserInput();
+  getUserInput();
     
 }
 
@@ -127,6 +94,42 @@ void getUserInput() {
       delay(100);
     }
   }
+  
+}
+
+void gateStage() {
+  
+}
+
+void rampStage() {
+  
+}
+
+void tankStage() {
+  
+  int tickCount = 0;
+
+  while (tickCount < 6) {
+
+    /* GO TO NEXT TICK */
+    aroundTank(menu); 
+    tickCount++;
+    
+    /* PICK UP AGENT */
+    raiseArm();
+    delay(500);
+    closePincer();
+    delay(1500);
+    lowerArm();
+    delay(1000);
+    openPincer();
+    shake();  // might be unnecessary
+    
+  }
+  
+}
+
+void lineStage() {
   
 }
 
