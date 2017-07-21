@@ -27,11 +27,19 @@
 #define CLAW_SERVO 1
 #define BASKET_SERVO 2
 
-/* MENU ITEMS */
-int velocity = 100;
-int kp = 15;
-int ki = 0;
-int kd = 35;
-int thresh = 775;
-int side_thresh = 930;
-bool leftCourse = true;
+/* STAGES */
+#define GATE_STAGE 0
+#define RAMP_STAGE 1
+#define TANK_STAGE 2
+#define LINE_STAGE 3
+
+/* DEFAULTS MENU VALUES */
+#define VELOCITY 100
+#define KP 15
+#define KI 0
+#define KD 35
+#define KP_CIRCLE 15
+#define KI_CIRCLE 0
+#define KD_CIRCLE 35
+#define THRESH 775
+#define THRESH_SIDE 930
