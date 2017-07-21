@@ -9,7 +9,7 @@
 //RCservo1 --> Pincer Open + Close
 
 /*Arm Raise*/
-void raiseChute(){
+void raiseArm(){
   for(int pos0 = 0 ; pos0<=170 ; pos0 += 1){
     RCServo0.write(pos0);
     delay(12);
