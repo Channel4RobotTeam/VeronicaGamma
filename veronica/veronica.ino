@@ -13,50 +13,7 @@ Menu* menu = new Menu();
 void setup() {
   #include <phys253setup.txt>
   Serial.begin(9600);
-
-  /* GET USER INPUT */  
-  while (true) {
-    /* press STOP to toggle options, press START to select current option */
-    LCD.clear(); LCD.home();
-    LCD.print("Press START to...");
-    LCD.setCursor(0,1);
-    switch (command) {
-      case 0: { LCD.print("RUN FULL COURSE"); } break;
-      case 1: { LCD.print("TAPE FOLLOW"); } break;
-      case 2: { LCD.print("CIRCLE FOLLOW"); } break;
-      case 3: { LCD.print("GATE STAGE"); } break;
-      case 4: { LCD.print("RAMP STAGE"); } break;
-      case 5: { LCD.print("TANK STAGE"); } break;
-      case 6: { LCD.print("LINE STAGE"); } break;
-    }
-    if (stopbutton()) {
-      delay(100); if (stopbutton()) { command = command + 1; }
-    }
-    if (startbutton()) {
-      delay(100); if (startbutton()) { break; }
-    }
-    delay(100);
-  }
-  if (command == 0 || command == 6) {
-    while (true) {
-      /* press STOP to toggle options, press START to select current option */
-      LCD.clear(); LCD.home();
-      LCD.print("Using surface...");
-      LCD.setCursor(0,1);
-      if (leftCourse) {
-        LCD.print("LEFT COURSE");
-      } else {
-        LCD.print("RIGHT COURSE");
-      }
-      if (stopbutton()) {
-        delay(100); if (stopbutton()) { leftCourse = !leftCourse; };
-      }
-      if (startbutton()) {
-        delay(100); if (stopbutton()) { break; }
-      }
-      delay(100);
-    }
-  }
+  getUserInput();
 }
 
 void loop() {
@@ -125,4 +82,51 @@ void loop() {
       } break;
     }
 
+    getUserInput();
+    
 }
+
+void getUserInput() {
+  
+  while (true) {
+    /* use TOP_POT to toggle options, press START to select current option */
+    int command = knob(TOP_POT) * 7 / 1024;
+    LCD.clear(); LCD.home();
+    LCD.print("Press START to...");
+    LCD.setCursor(0,1);
+    switch (command) {
+      case 0: { LCD.print("RUN FULL COURSE"); } break;
+      case 1: { LCD.print("TAPE FOLLOW"); } break;
+      case 2: { LCD.print("CIRCLE FOLLOW"); } break;
+      case 3: { LCD.print("GATE STAGE"); } break;
+      case 4: { LCD.print("RAMP STAGE"); } break;
+      case 5: { LCD.print("TANK STAGE"); } break;
+      case 6: { LCD.print("LINE STAGE"); } break;
+    }
+    if (startbutton()) {
+      delay(100); if (startbutton()) { break; }
+    }
+    delay(100);
+  }
+  
+  if (command == 0 || command == 6) {
+    while (true) {
+      /* use TOP_POT to toggle options, press START to select current option */
+      leftCourse = 1 - knob(TOP_POT) * 2 / 1024;
+      LCD.clear(); LCD.home();
+      LCD.print("Using surface...");
+      LCD.setCursor(0,1);
+      if (leftCourse) {
+        LCD.print("LEFT COURSE");
+      } else {
+        LCD.print("RIGHT COURSE");
+      }
+      if (startbutton()) {
+        delay(100); if (startbutton()) { break; }
+      }
+      delay(100);
+    }
+  }
+  
+}
+
