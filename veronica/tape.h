@@ -12,6 +12,7 @@
 void tapeFollow(Menu* menu);
 void aroundTank(Menu* menu);
 bool reachedTank();
+int getDistance();
 
 /* TAPE FOLLOWING VARIABLES */
 int lastErr = 0;
@@ -21,6 +22,9 @@ int displayCount = 0;
 int leftQRD;
 int rightQRD;
 int sideQRD;
+
+int wheelQRD;
+int wheelRevolutions = 0;
 
 /* TANK VARIABLES */
 int lastTickCount = 0;
@@ -103,7 +107,7 @@ void aroundTank(Menu* menu) {
     currCount++;
     displayCount = displayCount + 1;
 
-    /* Read Inputs */
+    /* INPUTS */
     leftQRD = analogRead(LEFT_QRD);
     rightQRD = analogRead(RIGHT_QRD);
     sideQRD = analogRead(SIDE_QRD);
@@ -159,15 +163,9 @@ void aroundTank(Menu* menu) {
     }
 
     /* When side QRD senses tape */
-    if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 700) {
+    if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 1000) {
       lastTickCount = currCount;
-      motor.speed(LEFT_MOTOR, 0);
-      motor.speed(RIGHT_MOTOR, 0);
-      LCD.clear(); LCD.home();
-      LCD.print("AT TICK MARK");
-      LCD.setCursor(0, 1);
-      LCD.print("S: "); LCD.print(sideQRD);
-     //delay(1000); // amount of time required to pick up toy
+      break;
     }
 
     lastErr = currErr;
@@ -177,6 +175,15 @@ void aroundTank(Menu* menu) {
 
 bool reachedTank() {
   return reachedTankVar;
+}
+
+int getDistance() {
+  /* Read Inputs */
+  wheelQRD = analogRead(WHEEL_QRD);
+
+  if(wheelQRD > THRESH_WHEEL) {
+    wheelRevolutions = wheelRevolutions + 1;
+  }
 }
 
 
