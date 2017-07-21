@@ -10,8 +10,8 @@
 #define EDGELEFT_QRD 3
 #define EDGERIGHT_QRD 4
 #define WHEEL_QRD 5
-#define HIGH_POT 6
-#define LOW_POT 7
+#define TOP_POT 6
+#define BOT_POT 7
 
 /* DIGITAL INPUTS */
 #define ONE_IR 0
@@ -32,6 +32,6 @@ int velocity = 100;
 int kp = 15;
 int ki = 0;
 int kd = 35;
-int thresh = 720;
+int thresh = 775;
 int side_thresh = 930;
 bool leftCourse = true;
