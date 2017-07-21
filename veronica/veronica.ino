@@ -5,6 +5,7 @@
 #include <menu.h>
 #include <navigate.h>
 #include <tape.h>
+#include <constants.h>
 
 void setup() {
   #include <phys253setup.txt>

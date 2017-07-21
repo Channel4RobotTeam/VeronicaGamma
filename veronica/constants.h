@@ -26,3 +26,12 @@
 #define ARM_SERVO 0
 #define CLAW_SERVO 1
 #define BASKET_SERVO 2
+
+/* MENU ITEMS */
+int velocity = 100;
+int kp = 15;
+int ki = 0;
+int kd = 35;
+int thresh = 720;
+int side_thresh = 930;
+bool leftCourse = true;
