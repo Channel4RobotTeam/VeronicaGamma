@@ -6,10 +6,11 @@
  */
 
 #include "constants.h" 
+#include "menu.h"
 
 /* FUNCTIONS DECLARATIONS */
-void tapeFollow();
-void aroundTank();
+void tapeFollow(Menu* menu);
+void aroundTank(Menu* menu);
 bool reachedTank();
 
 /* TAPE FOLLOWING VARIABLES */
@@ -25,7 +26,7 @@ int sideQRD;
 int lastTickCount = 0;
 bool reachedTankVar = false;
 
-void tapeFollow() {
+void tapeFollow(Menu* menu) {
   currCount = 0;
   displayCount = 0;
   while (true) {
@@ -45,39 +46,39 @@ void tapeFollow() {
 
     /* ERROR */
     int currErr = 0;
-    if (leftQRD < thresh && rightQRD > thresh) { /* SLIGHTLY LEFT OF TAPE */ 
+    if (leftQRD < menu->thresh && rightQRD > menu->thresh) { /* SLIGHTLY LEFT OF TAPE */ 
       currErr = -1; 
     } 
-    else if (leftQRD > thresh && rightQRD < thresh) { /* SLIGHTLY RIGHT OF TAPE */ 
+    else if (leftQRD > menu->thresh && rightQRD < menu->thresh) { /* SLIGHTLY RIGHT OF TAPE */ 
       currErr = +1; 
     } 
-    else if (leftQRD < thresh && rightQRD < thresh){ /* COMPLETELY OFF TAPE */
+    else if (leftQRD < menu->thresh && rightQRD < menu->thresh){ /* COMPLETELY OFF TAPE */
       if (lastErr < 0) { currErr = -2; } 
       else if(lastErr > 0) { currErr = +2; }
       else { /* COMPLETELY OFF TAPE AFTER AN ERROR OF 0 */  
         reachedTankVar = true;
-        aroundTank();
+        aroundTank(menu);
       }
     }
 
     /* CORRECTION CALCULATION */
-    int proportional = currErr * kp;
-    int integral = 0 * ki;
-    int derivative = ((currErr - lastErr) / (currCount - lastCount)) * kd;
+    int proportional = currErr * menu->kp;
+    int integral = 0 * menu->ki;
+    int derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd;
     int correction = proportional + integral + derivative;
 
     /* CORRECTION APPLICATION */
-    if (velocity + correction < 0 || velocity - correction < 0) {
+    if (menu->velocity + correction < 0 || menu->velocity - correction < 0) {
       if (correction < 0) {
-        motor.speed(LEFT_MOTOR, velocity - correction);
+        motor.speed(LEFT_MOTOR, menu->velocity - correction);
         motor.speed(RIGHT_MOTOR, 0);
       } else {
         motor.speed(LEFT_MOTOR, 0);
-        motor.speed(RIGHT_MOTOR, velocity + correction);
+        motor.speed(RIGHT_MOTOR, menu->velocity + correction);
       }
     } else {
-      motor.speed(LEFT_MOTOR, velocity - correction);
-      motor.speed(RIGHT_MOTOR, velocity + correction);
+      motor.speed(LEFT_MOTOR, menu->velocity - correction);
+      motor.speed(RIGHT_MOTOR, menu->velocity + correction);
     }
 
     /* PRINTS INPUTS AND OUTPUTS */
@@ -94,7 +95,7 @@ void tapeFollow() {
   }
 }
 
-void aroundTank() {
+void aroundTank(Menu* menu) {
   currCount = 0;
   displayCount = 0;
   lastTickCount = 0;
@@ -114,38 +115,38 @@ void aroundTank() {
 
     /* ERROR */
     int currErr = 0;
-    if (leftQRD < thresh && rightQRD > thresh) { /* SLIGHTLY LEFT OF TAPE  -> desired position */ 
-      currErr = 0; 
+    if (leftQRD < menu->thresh && rightQRD > menu->thresh) { /* SLIGHTLY LEFT OF TAPE  -> desired position */ 
+      currErr = -1; 
     } 
-    else if (leftQRD > thresh && rightQRD > thresh) { /* ON TAPE -> right of desired position */
-      currErr = 1;
+    else if (leftQRD > menu->thresh && rightQRD > menu->thresh) { /* ON TAPE -> right of desired position */
+      currErr = 0;
     }
-    else if (leftQRD > thresh && rightQRD < thresh) { /* SLIGHTLY RIGHT OF TAPE -> very right of desired position */ 
+    else if (leftQRD > menu->thresh && rightQRD < menu->thresh) { /* SLIGHTLY RIGHT OF TAPE -> very right of desired position */ 
       currErr = 1; 
     } 
-    else if (leftQRD < thresh && rightQRD < thresh) { /* COMPLETELY OFF TAPE */
-      if(lastErr > 0) { currErr = 2; } // extremely right of desired position
-      else { currErr = -1; }
+    else if (leftQRD < menu->thresh && rightQRD < menu->thresh) { /* COMPLETELY OFF TAPE */
+      if(lastErr == 0 || lastErr > 0) { currErr = 3; } // extremely right of desired position
+      else { currErr = 0; }
     }
 
     /* CORRECTION CALCULATION */
-    int proportional = currErr * kp;
-    int integral = 0 * ki;
-    int derivative = ((currErr - lastErr) / (currCount - lastCount)) * kd;
+    int proportional = currErr * menu->kp_circle;
+    int integral = 0 * menu->ki_circle;
+    int derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd_circle;
     int correction = proportional + integral + derivative;
 
     /* CORRECTION APPLICATION */
-    if (velocity + correction < 0 || velocity - correction < 0) {
+    if (menu->velocity + correction < 0 || menu->velocity - correction < 0) {
       if (correction < 0) {
-        motor.speed(LEFT_MOTOR, velocity - correction);
+        motor.speed(LEFT_MOTOR, menu->velocity - correction);
         motor.speed(RIGHT_MOTOR, 0);
       } else {
         motor.speed(LEFT_MOTOR, 0);
-        motor.speed(RIGHT_MOTOR, velocity + correction);
+        motor.speed(RIGHT_MOTOR, menu->velocity + correction);
       }
     } else {
-      motor.speed(LEFT_MOTOR, velocity - correction);
-      motor.speed(RIGHT_MOTOR, velocity + correction);
+      motor.speed(LEFT_MOTOR, menu->velocity - correction);
+      motor.speed(RIGHT_MOTOR, menu->velocity + correction);
     }
 
     /* PRINTS INPUTS AND OUTPUTS */
@@ -158,7 +159,7 @@ void aroundTank() {
     }
 
     /* When side QRD senses tape */
-    if(sideQRD > side_thresh && (currCount - lastTickCount) > 700) {
+    if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 700) {
       lastTickCount = currCount;
       motor.speed(LEFT_MOTOR, 0);
       motor.speed(RIGHT_MOTOR, 0);

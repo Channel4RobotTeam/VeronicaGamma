@@ -2,7 +2,6 @@
 #include <LiquidCrystal.h>
 
 #include "actuators.h"
-#include "menu.h"
 #include "navigate.h"
 #include "tape.h"
 #include "constants.h"
@@ -73,7 +72,7 @@ void loop() {
         /* CALL MENU */
         displayMenu(menu);
         /* TAPE FOLLOW */
-        tapeFollow();
+        tapeFollow(menu);
         
       } break;
       
@@ -82,7 +81,7 @@ void loop() {
         /* CALL MENU */
         displayMenu(menu);
         /* TAPE FOLLOW */
-        aroundTank();
+        aroundTank(menu);
         
       } break;
       

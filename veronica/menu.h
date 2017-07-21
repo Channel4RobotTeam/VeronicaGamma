@@ -3,7 +3,7 @@
 
 #include "constants.h"
 
-class Menu {
+class Menu{
   public:
     int velocity;
     int kp;
