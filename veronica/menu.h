@@ -79,6 +79,10 @@ void displayMenu(Menu* veronicaMenu) {
           case 8: { veronicaMenu->thresh_side = newVal; } break;
         }
       }
+      delay(1000);
+      if (startbutton()){
+        break;
+      }
     }
   }
   
