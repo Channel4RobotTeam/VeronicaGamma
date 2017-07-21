@@ -96,6 +96,19 @@ void loop() {
       
       case 5: { // TANK STAGE
         
+        displayMenu(menu);
+
+        /*Object Retrieval Sequence*/
+        raiseArm();
+        delay(500);
+        closePincer();
+        delay(1500);
+        lowerArm();
+        delay(1000);
+        openPincer();
+
+        /*if(stuck) shake*/ //maybe add in l8er if we decide too
+        
       } break;
       
       case 6: { // LINE STAGE
