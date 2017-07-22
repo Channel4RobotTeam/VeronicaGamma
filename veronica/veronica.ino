@@ -41,7 +41,7 @@ void loop() {
     case 0: { /* RUN FULL COURSE */
       /* TODO combine everything!!! */
     } break;
-    case 1: { tapeFollow(menu); } break; /* TAPE FOLLOW */
+    case 1: { tapeFollow(menu, false); } break; /* TAPE FOLLOW */
     case 2: { aroundTank(menu); } break; /* CIRCLE FOLLOW */
     case 3: { gateStage(); } break; /* GATE STAGE */
     case 4: { rampStage(); } break; /* RAMP STAGE */
@@ -98,8 +98,9 @@ void getUserInput() {
   
 }
 
-void gateStage() {
-  
+void gateStage() { 
+  tapeFollow(menu, true);
+  /* might want to add some sort of break out of tapeFollow for when the front QRDS recognize the ramp ??? */ 
 }
 
 void rampStage() {

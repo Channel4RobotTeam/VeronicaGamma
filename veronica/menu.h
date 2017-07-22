@@ -14,8 +14,10 @@ class Menu {
     int kd_circle;
     int thresh;
     int thresh_side;
+    int thresh_onekhz;
+    int thresh_tenkhz;
     int numMenuItems;
-    String menuItemNames[9] = {"vel", "kp", "ki", "kd", "kp_c", "ki_c", "kd_c", "thresh", "thresh_s"};
+    String menuItemNames[11] = {"vel", "kp", "ki", "kd", "kp_c", "ki_c", "kd_c", "thresh", "thresh_s", "onekhz", "tenkhz"};
     Menu(){
       velocity = VELOCITY;
       kp = KP;
@@ -26,7 +28,9 @@ class Menu {
       kd_circle = KD_CIRCLE;
       thresh = THRESH;
       thresh_side = THRESH_SIDE;
-      numMenuItems = 9;
+      thresh_onekhz = THRESH_ONEKHZ;
+      thresh_tenkhz = THRESH_TENKHZ;
+      numMenuItems = 11;
     }
 };
 
@@ -57,6 +61,8 @@ void displayMenu(Menu* veronicaMenu) {
       case 6: { LCD.print(veronicaMenu->kd_circle); } break;
       case 7: { LCD.print(veronicaMenu->thresh); } break;
       case 8: { LCD.print(veronicaMenu->thresh_side); } break;
+      case 9: { LCD.print(veronicaMenu->thresh_onekhz); } break;
+      case 10: { LCD.print(veronicaMenu->thresh_tenkhz); } break;
     }
     LCD.setCursor(0,1);
     LCD.print("Set as: "); LCD.print(newVal);
@@ -77,6 +83,8 @@ void displayMenu(Menu* veronicaMenu) {
           case 6: { veronicaMenu->kd_circle = newVal; } break;
           case 7: { veronicaMenu->thresh = newVal; } break;
           case 8: { veronicaMenu->thresh_side = newVal; } break;
+          case 9: { veronicaMenu->thresh_onekhz = newVal; } break;
+          case 10: { veronicaMenu->thresh_tenkhz = newVal; } break;
         }
       }
       delay(1000);

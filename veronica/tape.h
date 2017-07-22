@@ -36,7 +36,7 @@ double distance = 0;
 int lastTickCount = 0;
 bool reachedTankVar = false;
 
-void tapeFollow(Menu* menu) {
+void tapeFollow(Menu* menu, bool gateStage) {
   currCount = 0;
   displayCount = 0;
   while (true) {
@@ -87,6 +87,12 @@ void tapeFollow(Menu* menu) {
     int correction = proportional + integral + derivative;
 
     /* CORRECTION APPLICATION */
+    if (gateStage) {
+      /* STAY STOPPED WHILE THE ALARM IS ON */
+      while (analogRead(ONEKHZ) < menu->thresh_onekhz || analogRead(TENKHZ) > menu->thresh_tenkhz) {
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+      }
+    }
     if (menu->velocity + correction < 0 || menu->velocity - correction < 0) {
       if (correction < 0) {
         motor.speed(LEFT_MOTOR, menu->velocity - correction);

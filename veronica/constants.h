@@ -7,16 +7,14 @@
 #define LEFT_QRD 0
 #define RIGHT_QRD 1
 #define SIDE_QRD 2
-#define EDGELEFT_QRD 3
-#define EDGERIGHT_QRD 4
+#define ONEKHZ 3
+#define TENKHZ 4
 #define WHEEL_QRD 5
 #define TOP_POT 6
 #define BOT_POT 7
 
 /* DIGITAL INPUTS */
-#define ONE_IR 0
-#define TEN_IR 1
-#define BASKET_SWITCH 2
+#define BASKET_SWITCH 0
 
 /* MOTOR OUTPUTS */
 #define RIGHT_MOTOR 0
@@ -43,6 +41,8 @@
 #define KD_CIRCLE 35
 #define THRESH 775
 #define THRESH_SIDE 930
+#define THRESH_ONEKHZ 500
+#define THRESH_TENKHZ 500
 
 /* DISTANCE TRACKING VALUES */
 #define THRESH_WHEEL 900 
