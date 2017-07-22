@@ -49,6 +49,13 @@ void tapeFollow(Menu* menu) {
       delay(1000); 
       if (switch0 == 0) { break; } 
     }
+    if (stopbutton()) {
+      delay(1000);
+      if (stopbutton()){
+        displayMenu(menu);
+        displayCount = 0;
+      }
+    }
 
     /* INPUTS */
     leftQRD = analogRead(LEFT_QRD);
@@ -132,6 +139,13 @@ void aroundTank(Menu* menu) {
     if (switch0 == 0) { 
       delay(1000); 
       if (switch0 == 0) { break; } 
+    }
+    if (stopbutton()) {
+      delay(1000);
+      if (stopbutton()){
+        displayMenu(menu);
+        displayCount = 0;
+      }
     }
 
     /* ERROR */
