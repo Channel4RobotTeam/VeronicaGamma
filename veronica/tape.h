@@ -1,4 +1,5 @@
 /* 
+ *  Channel 4 News Team
  *  Veronica
  *  July 2017
  *  
@@ -14,6 +15,8 @@ void aroundTank(Menu* menu);
 bool reachedTank();
 double getDistance();
 void recoverLostTape(Menu* menu, int currentError, int lastError);
+
+int switch0 = digitalRead(0);
 
 /* TAPE FOLLOWING VARIABLES */
 int lastErr = 0;
@@ -40,10 +43,11 @@ void tapeFollow(Menu* menu) {
     currCount = currCount + 1;
     displayCount = displayCount + 1;
     
-    /* Press STOP to switch to menu */
-    if (stopbutton()) { 
+    /* Press YELLOW RESET to switch to user input menu */
+    switch0 = digitalRead(0);
+    if (switch0 == 0) { 
       delay(1000); 
-      if (stopbutton()) { break; } 
+      if (switch0 == 0) { break; } 
     }
 
     /* INPUTS */
@@ -122,11 +126,12 @@ void aroundTank(Menu* menu) {
     leftQRD = analogRead(LEFT_QRD);
     rightQRD = analogRead(RIGHT_QRD);
     sideQRD = analogRead(SIDE_QRD);
-    
-    /* Press STOP to switch to menu */
-    if (stopbutton()) { 
-       delay(1000);
-       if(stopbutton()) { break; }
+
+    /* Press YELLOW RESET to switch to user input menu */
+    switch0 = digitalRead(0);
+    if (switch0 == 0) { 
+      delay(1000); 
+      if (switch0 == 0) { break; } 
     }
 
     /* ERROR */

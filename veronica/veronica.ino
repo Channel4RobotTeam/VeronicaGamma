@@ -54,10 +54,11 @@ void loop() {
 }
 
 void getUserInput() {
+  motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
   
   while (true) {
     /* use TOP_POT to toggle options, press START to select current option */
-    int command = knob(TOP_POT) * 7 / 1024;
+    command = knob(TOP_POT) * 7 / 1024;
     LCD.clear(); LCD.home();
     LCD.print("Press START to...");
     LCD.setCursor(0,1);
