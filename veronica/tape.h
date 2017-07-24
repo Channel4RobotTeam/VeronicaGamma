@@ -26,6 +26,7 @@ int displayCount = 0;
 int leftQRD;
 int rightQRD;
 int sideQRD;
+int onTapeCount = 0;
 
 /* DISTANCE TRACKING VARIABLES */
 int wheelQRD;
@@ -67,13 +68,29 @@ void tapeFollow(Menu* menu, bool gateStage) {
     int currErr = 0;
     if (leftQRD < menu->thresh && rightQRD > menu->thresh) { /* SLIGHTLY LEFT OF TAPE */ 
       currErr = -1; 
+      onTapeCount = currCount;
     } 
     else if (leftQRD > menu->thresh && rightQRD < menu->thresh) { /* SLIGHTLY RIGHT OF TAPE */ 
       currErr = +1; 
+      onTapeCount = currCount;
     } 
     else if (leftQRD < menu->thresh && rightQRD < menu->thresh){ /* COMPLETELY OFF TAPE */
-      if (lastErr < 0) { currErr = -2; } 
-      else if(lastErr > 0) { currErr = +2; }
+      if (lastErr < 0) { // OFF TO LEFT
+        currErr = -2; 
+        if((currCount - onTapeCount) > 2000) {
+          motor.speed(LEFT_MOTOR, 0);
+          motor.speed(RIGHT_MOTOR, 0);
+          recoverLostTape(menu, currErr, lastErr);
+        }
+      } 
+      else if(lastErr > 0) { // OFF TO RIGHT
+        currErr = +2; 
+        if((currCount - onTapeCount) > 2000) {
+          motor.speed(LEFT_MOTOR, 0);
+          motor.speed(RIGHT_MOTOR, 0);
+          recoverLostTape(menu, currErr, lastErr);
+        }
+      }
       else { /* COMPLETELY OFF TAPE AFTER AN ERROR OF 0 */  
         reachedTankVar = true;
         aroundTank(menu);
@@ -132,7 +149,7 @@ void aroundTank(Menu* menu) {
   displayCount = 0;
   lastTickCount = 0;
   while (true) {
-    currCount++;
+    currCount = currCount + 1; //changed from currCount++
     displayCount = displayCount + 1;
 
     /* INPUTS */
@@ -219,6 +236,12 @@ double getDistance() {
 }
 
 void recoverLostTape(Menu* menu, int currentError, int lastError) {
-  
+  if(currentError < 0) {
+    motor.speed(LEFT_MOTOR, menu->velocity+25);
+    motor.speed(RIGHT_MOTOR, menu->velocity-50);
+  } else {
+    motor.speed(LEFT_MOTOR, menu->velocity+25);
+    motor.speed(RIGHT_MOTOR, menu->velocity-50);
+  }
 }
 
