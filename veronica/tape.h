@@ -23,10 +23,15 @@ int lastErr = 0;
 int currCount = 0;
 int lastCount = 0;
 int displayCount = 0;
+int onTapeCount = 0;
+
+// QRDs
 int leftQRD;
 int rightQRD;
 int sideQRD;
-int onTapeCount = 0;
+int frontQRD;
+
+#define FRONT_QRD 3
 
 /* DISTANCE TRACKING VARIABLES */
 int wheelQRD;
@@ -63,6 +68,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
     rightQRD = analogRead(RIGHT_QRD);
     sideQRD = analogRead(SIDE_QRD);
     wheelQRD = analogRead(WHEEL_QRD);
+    frontQRD = analogRead(FRONT_QRD);
 
     /* ERROR */
     int currErr = 0;
@@ -75,25 +81,27 @@ void tapeFollow(Menu* menu, bool gateStage) {
       onTapeCount = currCount;
     } 
     else if (leftQRD < menu->thresh && rightQRD < menu->thresh){ /* COMPLETELY OFF TAPE */
-      if (lastErr < 0) { // OFF TO LEFT
+      if(frontQRD < menu->thresh) {
+        reachedTankVar = true;
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, 0);
+//      aroundTank(menu);
+      }
+      else if (lastErr < 0) { // OFF TO LEFT
         currErr = -2; 
-        if((currCount - onTapeCount) > 2000) {
-          motor.speed(LEFT_MOTOR, 0);
-          motor.speed(RIGHT_MOTOR, 0);
-          recoverLostTape(menu, currErr, lastErr);
-        }
+//        if((currCount - onTapeCount) > 2000) {
+//          motor.speed(LEFT_MOTOR, 0);
+//          motor.speed(RIGHT_MOTOR, 0);
+//          recoverLostTape(menu, currErr, lastErr);
+//        }
       } 
       else if(lastErr > 0) { // OFF TO RIGHT
         currErr = +2; 
-        if((currCount - onTapeCount) > 2000) {
-          motor.speed(LEFT_MOTOR, 0);
-          motor.speed(RIGHT_MOTOR, 0);
-          recoverLostTape(menu, currErr, lastErr);
-        }
-      }
-      else { /* COMPLETELY OFF TAPE AFTER AN ERROR OF 0 */  
-        reachedTankVar = true;
-        aroundTank(menu);
+//        if((currCount - onTapeCount) > 2000) {
+//          motor.speed(LEFT_MOTOR, 0);
+//          motor.speed(RIGHT_MOTOR, 0);
+//          recoverLostTape(menu, currErr, lastErr);
+//        }
       }
     }
 
@@ -128,7 +136,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
       LCD.clear(); LCD.home();
       LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
       LCD.setCursor(0,1);
-      LCD.print("Corr: "); LCD.print(correction);
+      LCD.print("F: "); LCD.print(frontQRD); LCD.print("Corr: "); LCD.print(correction);
       displayCount = 0; /* RESET */
     }
 
