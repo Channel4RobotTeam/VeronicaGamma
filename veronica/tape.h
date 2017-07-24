@@ -72,16 +72,16 @@ void tapeFollow(Menu* menu, bool gateStage) {
 
     /* ERROR */
     int currErr = 0;
-    if (leftQRD < menu->thresh && rightQRD > menu->thresh) { /* SLIGHTLY LEFT OF TAPE */ 
+    if (leftQRD < menu->thresh_left && rightQRD > menu->thresh_right) { /* SLIGHTLY LEFT OF TAPE */ 
       currErr = -1; 
       onTapeCount = currCount;
     } 
-    else if (leftQRD > menu->thresh && rightQRD < menu->thresh) { /* SLIGHTLY RIGHT OF TAPE */ 
+    else if (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right) { /* SLIGHTLY RIGHT OF TAPE */ 
       currErr = +1; 
       onTapeCount = currCount;
     } 
-    else if (leftQRD < menu->thresh && rightQRD < menu->thresh){ /* COMPLETELY OFF TAPE */
-      if(frontQRD < menu->thresh) {
+    else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right){ /* COMPLETELY OFF TAPE */
+      if(frontQRD < menu->thresh_front) {
         reachedTankVar = true;
         motor.speed(LEFT_MOTOR, 0);
         motor.speed(RIGHT_MOTOR, 0);
@@ -181,16 +181,16 @@ void aroundTank(Menu* menu) {
 
     /* ERROR */
     int currErr = 0;
-    if (leftQRD < menu->thresh && rightQRD > menu->thresh) { /* SLIGHTLY LEFT OF TAPE */ 
+    if (leftQRD < menu->thresh_left && rightQRD > menu->thresh_right) { /* SLIGHTLY LEFT OF TAPE */ 
       currErr = -1; 
     } 
-    else if (leftQRD > menu->thresh && rightQRD > menu->thresh) { /* ON TAPE */
+    else if (leftQRD > menu->thresh_left && rightQRD > menu->thresh_right) { /* ON TAPE */
       currErr = 0;
     }
-    else if (leftQRD > menu->thresh && rightQRD < menu->thresh) { /* SLIGHTLY RIGHT OF TAPE */ 
+    else if (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right) { /* SLIGHTLY RIGHT OF TAPE */ 
       currErr = 1; 
     } 
-    else if (leftQRD < menu->thresh && rightQRD < menu->thresh) { /* COMPLETELY OFF TAPE */
+    else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right) { /* COMPLETELY OFF TAPE */
       if(lastErr == 0 || lastErr > 0) { currErr = 3; } // extremely right of desired position
       else { currErr = 0; }
     }
