@@ -41,7 +41,7 @@ void loop() {
     case 0: { /* RUN FULL COURSE */
 
       gateStage();  /* GO FROM START TO START OF TANK */
-//      rightTurn(); /* RIGHT TURN ONTO THE TAPE AROUND THE TANK */
+      rightTurn(); /* RIGHT TURN ONTO THE TAPE AROUND THE TANK */
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       int countTo = 1; 
       /* NAVIGATE TO FIRST TICK MARK */

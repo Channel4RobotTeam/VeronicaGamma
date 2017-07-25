@@ -81,13 +81,13 @@ void tapeFollow(Menu* menu, bool gateStage) {
       onTapeCount = currCount;
     } 
     else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right){ /* COMPLETELY OFF TAPE */
-      if(lastErr == 0) {
-        reachedTankVar = true;
-        motor.speed(LEFT_MOTOR, 0);
-        motor.speed(RIGHT_MOTOR, 0);
-        break;
-      }
-      else if (lastErr < 0) { // OFF TO LEFT
+//      if(lastErr == 0) {
+//        reachedTankVar = true;
+//        motor.speed(LEFT_MOTOR, 0);
+//        motor.speed(RIGHT_MOTOR, 0);
+//        break;
+//      }
+      if (lastErr < 0) { // OFF TO LEFT
         currErr = -2; 
 //        if((currCount - onTapeCount) > 2000) {
 //          motor.speed(LEFT_MOTOR, 0);
