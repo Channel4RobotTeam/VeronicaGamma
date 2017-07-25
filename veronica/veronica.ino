@@ -43,7 +43,7 @@ void loop() {
       gateStage();  /* GO FROM START TO START OF TANK */
       rightTurn(); /* RIGHT TURN ONTO THE TAPE AROUND THE TANK */
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
-      int countTo = 1; 
+      int countTo = 2; 
       /* NAVIGATE TO FIRST TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
         aroundTank(menu); 
