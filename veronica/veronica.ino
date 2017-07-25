@@ -39,7 +39,17 @@ void loop() {
   switch (command) {
     
     case 0: { /* RUN FULL COURSE */
-      /* TODO combine everything!!! */
+
+      gateStage();  /* GO FROM START TO START OF TANK */
+//      rightTurn(); /* RIGHT TURN ONTO THE TAPE AROUND THE TANK */
+      tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
+      int countTo = 1; 
+      /* NAVIGATE TO FIRST TICK MARK */
+      for (int i = 0; i < countTo; i = i + 1) {
+        aroundTank(menu); 
+      }
+      lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
+      
     } break;
     case 1: { tapeFollow(menu, false); } break; /* TAPE FOLLOW */
     case 2: { aroundTank(menu); } break; /* CIRCLE FOLLOW */
@@ -99,12 +109,15 @@ void getUserInput() {
 }
 
 void gateStage() { 
+  
   tapeFollow(menu, true);
-  /* might want to add some sort of break out of tapeFollow for when the front QRDS recognize the ramp ??? */ 
+  
 }
 
 void rampStage() {
   
+  tapeFollow(menu, false);
+
 }
 
 void tankStage() {

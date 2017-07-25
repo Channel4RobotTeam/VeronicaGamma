@@ -117,6 +117,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
       while (analogRead(ONEKHZ) < menu->thresh_onekhz || analogRead(TENKHZ) > menu->thresh_tenkhz) {
         motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       }
+      break;
     }
     if (menu->velocity + correction < 0 || menu->velocity - correction < 0) {
       if (correction < 0) {
