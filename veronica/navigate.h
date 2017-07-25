@@ -11,6 +11,7 @@
 /* FUNCTION DECLARATIONS */
 void locateZipline();
 void turnToZipline(bool course);
+void rightTurn();
 
 int signal10kHz = 0;
 int lastSignal10kHz = 0;
@@ -67,6 +68,20 @@ void turnToZipline(bool course) {
     } else if(turnCount >= 1000) {
       motor.speed(LEFT_MOTOR, 0);
       motor.speed(RIGHT_MOTOR, 0);
+      break;
+    }
+  }
+}
+
+void rightTurn() {
+  int rightTurnCount = 0;
+  
+  while(true) {
+    motor.speed(LEFT_MOTOR, VELOCITY-50);
+    motor.speed(RIGHT_MOTOR, -25);
+    rightTurnCount++;
+
+    if(rightTurnCount > 1000) {
       break;
     }
   }

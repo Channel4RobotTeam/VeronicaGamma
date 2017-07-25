@@ -81,11 +81,11 @@ void tapeFollow(Menu* menu, bool gateStage) {
       onTapeCount = currCount;
     } 
     else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right){ /* COMPLETELY OFF TAPE */
-      if(frontQRD < menu->thresh_front) {
+      if(lastErr == 0) {
         reachedTankVar = true;
         motor.speed(LEFT_MOTOR, 0);
         motor.speed(RIGHT_MOTOR, 0);
-//      aroundTank(menu);
+        break;
       }
       else if (lastErr < 0) { // OFF TO LEFT
         currErr = -2; 
@@ -227,6 +227,8 @@ void aroundTank(Menu* menu) {
 
     /* When side QRD senses tape */
     if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 1000) {
+      motor.speed(LEFT_MOTOR, 0);
+      motor.speed(RIGHT_MOTOR, 0);
       lastTickCount = currCount;
       break;
     }
