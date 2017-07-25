@@ -41,7 +41,7 @@ void loop() {
     case 0: { /* RUN FULL COURSE */
 
       gateStage();  /* GO FROM START TO START OF TANK */
-      rightTurn(); /* RIGHT TURN ONTO THE TAPE AROUND THE TANK */
+      rightTurn(menu); /* RIGHT TURN ONTO THE TAPE AROUND THE TANK */
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       int countTo = 2; 
       /* NAVIGATE TO FIRST TICK MARK */
@@ -52,7 +52,15 @@ void loop() {
       
     } break;
     case 1: { tapeFollow(menu, false); } break; /* TAPE FOLLOW */
-    case 2: { aroundTank(menu); } break; /* CIRCLE FOLLOW */
+    case 2: { 
+      while(true) {
+        aroundTank(menu); 
+        if (digitalRead(0) == 0) { 
+          delay(1000); 
+          if (digitalRead(0) == 0) { break; } 
+        }
+      }
+    } break; /* CIRCLE FOLLOW */
     case 3: { gateStage(); } break; /* GATE STAGE */
     case 4: { rampStage(); } break; /* RAMP STAGE */
     case 5: { tankStage(); } break; /* TANK STAGE */
@@ -144,7 +152,10 @@ void tankStage() {
   
 }
 
-void lineStage() {
+void lineStage() { 
+  
+  locateZipline();
+  turnToZipline(leftCourse);
   
 }
 

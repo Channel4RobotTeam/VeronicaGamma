@@ -7,7 +7,6 @@
  */
 
 #include "constants.h" 
-#include "menu.h"
 
 /* FUNCTIONS DECLARATIONS */
 void tapeFollow(Menu* menu);

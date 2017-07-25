@@ -7,11 +7,12 @@
  */
 
 #include "constants.h" 
+#include "menu.h"
 
 /* FUNCTION DECLARATIONS */
 void locateZipline();
 void turnToZipline(bool course);
-void rightTurn();
+void rightTurn(Menu* menu);
 
 int signal10kHz = 0;
 int lastSignal10kHz = 0;
@@ -73,15 +74,19 @@ void turnToZipline(bool course) {
   }
 }
 
-void rightTurn() {
+void rightTurn(Menu* menu) {
   int rightTurnCount = 0;
+
+  /* INPUTS */
+  int leftQRD = analogRead(LEFT_QRD);
+  int rightQRD = analogRead(RIGHT_QRD);
   
   while(true) {
     motor.speed(LEFT_MOTOR, VELOCITY-50);
     motor.speed(RIGHT_MOTOR, -25);
     rightTurnCount++;
 
-    if(rightTurnCount > 1000) {
+    if(leftQRD > menu->thresh_left && rightQRD > menu->thresh_right) {
       break;
     }
   }
