@@ -51,7 +51,7 @@ void loop() {
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
       
     } break;
-    case 1: { tapeFollow(menu, false); } break; /* TAPE FOLLOW */
+    case 1: { tapeFollow(menu, false); } break; /* TAPE FOLLOW */ 
     case 2: { 
       while(true) {
         aroundTank(menu); 
