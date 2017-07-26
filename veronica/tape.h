@@ -59,18 +59,6 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
   int turnValue = 0;
   int lastTurnValue = 0;
   
-//  /* WAIT UNTIL VERONICA IS ON TAPE */
-//  LCD.clear(); LCD.home();
-//  LCD.print("Place on tape!");
-//  LCD.setCursor(0,1);
-//  LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(" R: "); LCD.print(analogRead(RIGHT_QRD));
-//  while(analogRead(LEFT_QRD) < THRESH_LEFT && analogRead(RIGHT_QRD) < THRESH_RIGHT){
-//    motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//    LCD.setCursor(0,1);
-//    LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(" R: "); LCD.print(analogRead(RIGHT_QRD));
-//    delay(10);
-//  }
-  
   currCount = 0;
   displayCount = 0;
   distance = 0;
@@ -89,25 +77,6 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       delay(1000); 
       if (switch0 == 0) { break; } 
     }
-    /* Press STOP to be prompted to open the menu */
-//    if (stopbutton()) {
-//      delay(1000);
-//      if (stopbutton()) {
-//        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//        LCD.clear(); LCD.home();
-//        LCD.print("Press START to");
-//        LCD.setCursor(0,1);
-//        LCD.print("go to menu");
-//        int i = 0;
-//        for (int i = 0; i < 3000; i = i + 1) {
-//          if (startbutton()) {
-//            delay(100);
-//            if (startbutton()) { displayMenu(menu); displayCount = 0; }
-//          }
-//          delay(1); 
-//        }
-//      }
-//    }
 
     /* INPUTS */
     leftQRD = analogRead(LEFT_QRD);
@@ -217,19 +186,11 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
  * 
  */
 void aroundTank(Menu* menu) {
-
-  /* WAIT UNTIL VERONICA IS ON TAPE */
-  LCD.clear(); LCD.home();
-  LCD.print("Place Veronica");
-  LCD.setCursor(0,1);
-  LCD.print("on tape!");
-  while(analogRead(LEFT_QRD) < menu->thresh_left && analogRead(RIGHT_QRD) < menu->thresh_right){
-    motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-  }
   
   currCount = 0;
   displayCount = 0;
   int lastTickCount = 0;
+  
   while (true) {
     currCount = currCount + 1; 
     displayCount = displayCount + 1;
@@ -245,13 +206,6 @@ void aroundTank(Menu* menu) {
       delay(1000); 
       if (switch0 == 0) { break; } 
     }
-//    if (stopbutton()) {
-//      delay(1000);
-//      if (stopbutton()){
-//        displayMenu(menu);
-//        displayCount = 0;
-//      }
-//    }
 
     /* ERROR */
     int currErr = tankError(menu, rightQRD, leftQRD, lastErr);
@@ -323,7 +277,7 @@ int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
     offTapeCount = 0;
   } 
   else if (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right) { /* SLIGHTLY RIGHT OF TAPE */ 
-    currentError = +1; 
+    currentError = 1; 
     offTapeCount = 0;
     if (noErrCount > 0) {
       noErrCount = noErrCount + 1;
@@ -340,7 +294,7 @@ int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
       noErrCount = 0;
     } 
     else if(lastError > 0) { // OFF TO RIGHT
-      currentError = +2; 
+      currentError = 2; 
       posErrCount = posErrCount + 1;
       negErrCount = 0;
       noErrCount = 0;
@@ -389,7 +343,7 @@ void printToLCD(int rightQRD, int leftQRD, int sideQRD, int wheelQRD) {
   LCD.clear(); LCD.home();
   LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
   LCD.setCursor(0,1);
-  LCD.print("W: "); LCD.print(wheelQRD); LCD.print(" d: "); LCD.print(distance);
+  LCD.print("W: "); LCD.print(wheelQRD); LCD.print("S: "); LCD.print(sideQRD);
 //LCD.print("1: "); LCD.print(analogRead(ONEKHZ)); LCD.print(" 10: "); LCD.print(analogRead(TENKHZ));
 }
 

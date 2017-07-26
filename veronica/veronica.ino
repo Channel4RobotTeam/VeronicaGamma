@@ -185,7 +185,6 @@ void tankStage() {
 void lineStage() { 
   
   locateZipline();
-  turnToZipline(leftCourse);
   
 }
 
