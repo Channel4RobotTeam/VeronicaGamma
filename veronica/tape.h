@@ -15,13 +15,11 @@ bool reachedTank();
 double getDistance();
 void recoverLostTape(Menu* menu, int currentError, int lastError);
 
-// helper functions
-int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError); //private
-int tankError(Menu* menu, int rightQRD, int leftQRD, int lastError); //private
-void correctionApplication(Menu* menu, int correction); //private
-void printToLCD(int rightQRD, int leftQRD, int sideQRD, int wheelQRD); // private
-
-int switch0 = digitalRead(0);
+/* HELPER FUNCTIONS */
+int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError); 
+int tankError(Menu* menu, int rightQRD, int leftQRD, int lastError); 
+void correctionApplication(Menu* menu, int correction); 
+void printToLCD(int rightQRD, int leftQRD, int sideQRD, int wheelQRD); 
 
 /* TAPE FOLLOWING VARIABLES */
 int lastErr = 0;
@@ -30,13 +28,12 @@ int lastCount = 0;
 int displayCount = 0;
 int onTapeCount = 0;
 
-// QRDs
+// QRDs & button
 int leftQRD;
 int rightQRD;
 int sideQRD;
 int frontQRD;
-
-#define FRONT_QRD 3
+int switch0 = digitalRead(0);
 
 /* DISTANCE TRACKING VARIABLES */
 // if distance tracking is not needed inside aroundTank() then put these variables in tapeFollow function
@@ -46,7 +43,6 @@ int wheelCount = 0;
 int wheelRevolutions = 0;
 
 /* TANK VARIABLES */
-int lastTickCount = 0;
 bool reachedTankVar = false;
 
 void tapeFollow(Menu* menu, bool gateStage) {
@@ -102,7 +98,6 @@ void tapeFollow(Menu* menu, bool gateStage) {
     rightQRD = analogRead(RIGHT_QRD);
     sideQRD = analogRead(SIDE_QRD);
     wheelQRD = analogRead(WHEEL_QRD);
-    frontQRD = analogRead(FRONT_QRD);
 
     /* ERROR */
     int currErr = tapeError(menu, rightQRD, leftQRD, lastErr);
@@ -153,15 +148,15 @@ void aroundTank(Menu* menu) {
   LCD.print("Place Veronica");
   LCD.setCursor(0,1);
   LCD.print("on tape!");
-  while(analogRead(LEFT_QRD) < THRESH_LEFT || analogRead(RIGHT_QRD) < THRESH_RIGHT){
+  while(analogRead(LEFT_QRD) < THRESH_LEFT && analogRead(RIGHT_QRD) < THRESH_RIGHT){
     motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
   }
   
   currCount = 0;
   displayCount = 0;
-  lastTickCount = 0;
+  int lastTickCount = 0;
   while (true) {
-    currCount = currCount + 1; //changed from currCount++
+    currCount = currCount + 1; 
     displayCount = displayCount + 1;
 
     /* INPUTS */
@@ -175,13 +170,13 @@ void aroundTank(Menu* menu) {
       delay(1000); 
       if (switch0 == 0) { break; } 
     }
-    if (stopbutton()) {
-      delay(1000);
-      if (stopbutton()){
-        displayMenu(menu);
-        displayCount = 0;
-      }
-    }
+//    if (stopbutton()) {
+//      delay(1000);
+//      if (stopbutton()){
+//        displayMenu(menu);
+//        displayCount = 0;
+//      }
+//    }
 
     /* ERROR */
     int currErr = tankError(menu, rightQRD, leftQRD, lastErr);
@@ -193,18 +188,7 @@ void aroundTank(Menu* menu) {
     int correction = proportional + integral + derivative;
 
     /* CORRECTION APPLICATION */
-    if (menu->velocity + correction < 0 || menu->velocity - correction < 0) {
-      if (correction < 0) {
-        motor.speed(LEFT_MOTOR, menu->velocity - correction);
-        motor.speed(RIGHT_MOTOR, 0);
-      } else {
-        motor.speed(LEFT_MOTOR, 0);
-        motor.speed(RIGHT_MOTOR, menu->velocity + correction);
-      }
-    } else {
-      motor.speed(LEFT_MOTOR, menu->velocity - correction);
-      motor.speed(RIGHT_MOTOR, menu->velocity + correction);
-    }
+    correctionApplication(menu, correction);
 
     /* PRINTS INPUTS AND OUTPUTS */
     if(displayCount == 30) {
