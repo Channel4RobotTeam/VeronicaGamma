@@ -1,3 +1,5 @@
+#pragma once
+
 #include <phys253.h>
 #include <LiquidCrystal.h>
 

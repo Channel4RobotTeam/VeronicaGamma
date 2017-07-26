@@ -32,15 +32,15 @@
 #define LINE_STAGE 3
 
 /* DEFAULTS MENU VALUES */
-#define VELOCITY 150
+#define VELOCITY 100
 #define KP 43
 #define KI 0
 #define KD 79
 #define KP_CIRCLE 40
 #define KI_CIRCLE 0
 #define KD_CIRCLE 75
-#define THRESH_LEFT 500
-#define THRESH_RIGHT 500
+#define THRESH_LEFT 300
+#define THRESH_RIGHT 300
 #define THRESH_SIDE 150
 #define THRESH_FRONT 900
 #define THRESH_ONEKHZ 900
@@ -49,3 +49,4 @@
 /* DISTANCE TRACKING VALUES */
 #define THRESH_WHEEL 900 
 #define WHEEL_RADIUS 0.044 
+#define TANK_DIST 6

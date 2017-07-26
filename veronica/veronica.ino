@@ -18,7 +18,6 @@
 #include <LiquidCrystal.h>
 
 #include "actuators.h"
-#include "navigate.h"
 #include "tape.h"
 #include "constants.h"
 
@@ -41,7 +40,8 @@ void loop() {
     case 0: { /* RUN FULL COURSE */
 
       gateStage();  /* GO FROM START TO START OF TANK */
-      rightTurn(menu); /* RIGHT TURN ONTO THE TAPE AROUND THE TANK */
+      rampStage(leftCourse); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
+//      rightTurn(menu); /* RIGHT TURN ONTO THE TAPE AROUND THE TANK */
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       int countTo = 2; 
       /* NAVIGATE TO FIRST TICK MARK */
@@ -51,8 +51,10 @@ void loop() {
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
       
     } break;
-    case 1: { tapeFollow(menu, false); } break; /* TAPE FOLLOW */ 
-    case 2: { 
+    
+    case 1: { tapeFollow(menu, false /*gateStage*/, true /*leftCourse*/); } break; /* TAPE FOLLOW */ 
+    
+    case 2: { /* CIRCLE FOLLOW */
       while(true) {
         aroundTank(menu); 
         if (digitalRead(0) == 0) { 
@@ -60,11 +62,34 @@ void loop() {
           if (digitalRead(0) == 0) { break; } 
         }
       }
-    } break; /* CIRCLE FOLLOW */
-    case 3: { gateStage(); } break; /* GATE STAGE */
-    case 4: { rampStage(); } break; /* RAMP STAGE */
-    case 5: { tankStage(); } break; /* TANK STAGE */
-    case 6: { lineStage(); } break; /* LINE STAGE */
+    } break; 
+    
+    case 3: { /* TEST ARM */
+      raiseArm();
+      delay(500);
+      closePincer();
+      delay(1500);
+      lowerArm();
+      delay(1000);
+      openPincer();
+      shake();  // might be unnecessary
+    } break; 
+    
+    case 4: { gateStage(); } break; /* GATE STAGE */
+    
+    case 5: { rampStage(leftCourse); } break; /* RAMP STAGE */
+    
+    case 6: { tankStage(); } break; /* TANK STAGE */
+    
+    case 7: { lineStage(); } break; /* LINE STAGE */
+
+    case 8: { /* MISC TEST */ 
+      while (true) {
+        printToLCD(analogRead(LEFT_QRD), analogRead(RIGHT_QRD), analogRead(SIDE_QRD), analogRead(WHEEL_QRD));
+        delay(50);
+      }
+    } break;
+    
   }
 
   getUserInput();
@@ -76,7 +101,7 @@ void getUserInput() {
   
   while (true) {
     /* use TOP_POT to toggle options, press START to select current option */
-    command = knob(TOP_POT) * 7 / 1024;
+    command = knob(TOP_POT) * 9 / 1024;
     LCD.clear(); LCD.home();
     LCD.print("Press START to...");
     LCD.setCursor(0,1);
@@ -84,10 +109,12 @@ void getUserInput() {
       case 0: { LCD.print("RUN FULL COURSE"); } break;
       case 1: { LCD.print("TAPE FOLLOW"); } break;
       case 2: { LCD.print("CIRCLE FOLLOW"); } break;
-      case 3: { LCD.print("GATE STAGE"); } break;
-      case 4: { LCD.print("RAMP STAGE"); } break;
-      case 5: { LCD.print("TANK STAGE"); } break;
-      case 6: { LCD.print("LINE STAGE"); } break;
+      case 3: { LCD.print("TEST ARM"); } break;
+      case 4: { LCD.print("GATE STAGE"); } break;
+      case 5: { LCD.print("RAMP STAGE"); } break;
+      case 6: { LCD.print("TANK STAGE"); } break;
+      case 7: { LCD.print("LINE STAGE"); } break;
+      case 8: { LCD.print("MISC TEST"); } break;
     }
     if (startbutton()) {
       delay(100); if (startbutton()) { break; }
@@ -95,7 +122,7 @@ void getUserInput() {
     delay(100);
   }
   
-  if (command == 0 || command == 6) {
+  if (command == 0 || command == 5) {
     while (true) {
       /* use TOP_POT to toggle options, press START to select current option */
       leftCourse = 1 - knob(TOP_POT) * 2 / 1024;
@@ -118,14 +145,17 @@ void getUserInput() {
 
 void gateStage() { 
   
-  tapeFollow(menu, true);
+  bool gateStage = true;
+  bool sideQRDMethod = false; /* only relevant for gate stage */
+  tapeFollow(menu, gateStage, sideQRDMethod);
   
 }
 
-void rampStage() {
+void rampStage(bool leftCourse) {
   
-  tapeFollow(menu, false);
-
+  bool gateStage = false;
+  tapeFollow(menu, gateStage, leftCourse);
+  
 }
 
 void tankStage() {

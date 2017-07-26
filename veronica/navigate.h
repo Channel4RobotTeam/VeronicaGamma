@@ -75,20 +75,37 @@ void turnToZipline(bool course) {
 }
 
 void rightTurn(Menu* menu) {
-  int rightTurnCount = 0;
-
-  /* INPUTS */
-  int leftQRD = analogRead(LEFT_QRD);
-  int rightQRD = analogRead(RIGHT_QRD);
+  int count = 0;
   
   while(true) {
+    /* Press YELLOW RESET to switch to user input menu */
+    int switch0 = digitalRead(0);
+    if (switch0 == 0) { 
+      delay(1000); 
+      if (switch0 == 0) { break; } 
+    }
+    
+    /* INPUTS */
+    int leftQRD = analogRead(LEFT_QRD);
+    int rightQRD = analogRead(RIGHT_QRD);
+    
+    count = count + 1;
+    if(count == 30) {
+      LCD.clear(); LCD.home();
+      LCD.print("RIGHT TURN");
+      LCD.setCursor(0,1); LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
+    }
+    
     motor.speed(LEFT_MOTOR, VELOCITY-50);
-    motor.speed(RIGHT_MOTOR, -25);
-    rightTurnCount++;
+    motor.speed(RIGHT_MOTOR, -75);
 
-    if(leftQRD > menu->thresh_left && rightQRD > menu->thresh_right) {
+    if(leftQRD > menu->thresh_left || rightQRD > menu->thresh_right) {
+      motor.speed(LEFT_MOTOR, 0);
+      motor.speed(RIGHT_MOTOR, 0);
+      delay(1000);
       break;
     }
   }
+  
 }
 
