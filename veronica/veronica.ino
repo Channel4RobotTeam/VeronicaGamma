@@ -85,7 +85,7 @@ void loop() {
 
     case 8: { /* MISC TEST */ 
       while (true) {
-        printToLCD(analogRead(LEFT_QRD), analogRead(RIGHT_QRD), analogRead(SIDE_QRD), analogRead(WHEEL_QRD));
+        printQRDs();
         delay(50);
       }
     } break;

@@ -20,7 +20,8 @@ void recoverLostTape(Menu* menu, int currentError, int lastError);
 int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError); 
 int tankError(Menu* menu, int rightQRD, int leftQRD, int lastError); 
 void correctionApplication(Menu* menu, int correction); 
-void printToLCD(int rightQRD, int leftQRD, int sideQRD, int wheelQRD); 
+void printQRDs(); 
+void printFreq();
 
 /* TAPE FOLLOWING VARIABLES */
 int lastErr = 0;
@@ -162,7 +163,7 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
     
     /* PRINTS INPUTS AND OUTPUTS */
     if(displayCount == 30) {
-//      printToLCD(rightQRD, leftQRD, sideQRD, wheelQRD);
+//      printQRDs();
       LCD.clear(); LCD.home();
       if (negErrCount > 100){
         LCD.print("Right turn!");
@@ -221,10 +222,7 @@ void aroundTank(Menu* menu) {
 
     /* PRINTS INPUTS AND OUTPUTS */
     if(displayCount == 30) {
-      LCD.clear(); LCD.home();
-      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
-      LCD.setCursor(0,1);
-      LCD.print("S: "); LCD.print(sideQRD); LCD.print(" W: "); LCD.print(correction);
+      printQRDs();
       displayCount = 0; /* RESET */
     }
 
@@ -339,11 +337,17 @@ void correctionApplication(Menu* menu, int correction) {
   }
 }
 
-void printToLCD(int rightQRD, int leftQRD, int sideQRD, int wheelQRD) {
+void printQRDs() {
   LCD.clear(); LCD.home();
-  LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
+  LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(" R: "); LCD.print(analogRead(RIGHT_QRD));
   LCD.setCursor(0,1);
-  LCD.print("W: "); LCD.print(wheelQRD); LCD.print("S: "); LCD.print(sideQRD);
-//LCD.print("1: "); LCD.print(analogRead(ONEKHZ)); LCD.print(" 10: "); LCD.print(analogRead(TENKHZ));
+  LCD.print("W: "); LCD.print(analogRead(WHEEL_QRD)); LCD.print("S: "); LCD.print(analogRead(SIDE_QRD));
+}
+
+void printFreq() {
+  LCD.clear(); LCD.home();
+  LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(" R: "); LCD.print(analogRead(RIGHT_QRD));
+  LCD.setCursor(0,1);
+  LCD.print("1: "); LCD.print(analogRead(ONEKHZ)); LCD.print(" 10: "); LCD.print(analogRead(TENKHZ));  
 }
 

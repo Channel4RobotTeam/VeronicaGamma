@@ -33,6 +33,7 @@ void locateZipline() {
       LCD.clear(); LCD.home();
       LCD.print("FINDING ZIPLINE");
       LCD.setCursor(0,1); LCD.print("10kHz: "); LCD.print(analogRead(TENKHZ));
+      count = 0;
     }
 
     motor.speed(LEFT_MOTOR, VELOCITY-50);
@@ -70,6 +71,7 @@ void rightTurn(Menu* menu) {
       LCD.clear(); LCD.home();
       LCD.print("RIGHT TURN");
       LCD.setCursor(0,1); LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
+      count = 0;
     }
     
     motor.speed(LEFT_MOTOR, VELOCITY-50);
