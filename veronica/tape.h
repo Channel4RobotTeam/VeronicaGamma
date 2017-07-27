@@ -66,6 +66,7 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
   wheelRevolutions = 0;
   wheelCount = 0;
   bool topOfRamp = false;
+  bool onRamp = false;
 
   /* MAIN LOOP */
   while (true) {
@@ -129,49 +130,64 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       /* STAY STOPPED WHILE THE ALARM IS ON */
       // 1kHz high is disarmed, 10kHz high is alarmed
       if(analogRead(ONEKHZ) < 100 || (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ) < 1023) /*&& analogRead(TENKHZ) > menu->thresh_tenkhz*/) { //change back to WHILE later
-        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
         LCD.clear(); LCD.home();
         LCD.print("WAITING...");
-        delay(3000);
-        gateStage = false; //TODO: change to a break statement
+        while (analogRead(ONEKHZ) < 100 || (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ)) < 1023){
+          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+        }
+        break; /* GATE STAGE ENDS WHEN DOOR DISARMS */
       }
       
     } else { /* RAMP STAGE */
       
       /* RECOGNIZE WHEN THE TOP OF THE RAMP IS REACHED */
-      if(leftQRD > 500 && rightQRD > 500 && !topOfRamp){
-        menu->velocity = 50;
-        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-        delay(5000);
-        topOfRamp = true;
-      }
+//      if (leftQRD > 500 && rightQRD > 500 && !topOfRamp && currCount < 10000){
+//        menu->velocity = 60;
+//        topOfRamp = true;
+//      }
 
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
-      if (leftCourse){
-        // TODO
+      if (leftCourse && topOfRamp){
+        if (posErrCount > 100){ /* LEFT TURN INTO TANK */
+          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+          delay(500);
+          rightTurn(menu);
+          break;
+        }
+      } else if (!leftCourse && topOfRamp) { /* RIGHT COURSE */
+        if (negErrCount > 100){ /* RIGHT TURN INTO TANK */
+          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+          delay(500);
+          break;
+        }
       }
       
     }
 
-    /* When wheel QRD sees white tape */
-    if(wheelQRD < THRESH_WHEEL && (currCount - wheelCount) > 100) {
-      wheelRevolutions = wheelRevolutions + 1;
-      double circumference = 2 * PI * WHEEL_RADIUS;
-      distance = wheelRevolutions * circumference;
-      wheelCount = currCount;
-    }
+    /* UPDATES DISTANCE WHEN WHEEL QRD SEES TAPE */
+//    if(wheelQRD < THRESH_WHEEL && (currCount - wheelCount) > 100) {
+//      wheelRevolutions = wheelRevolutions + 1;
+//      double circumference = 2 * PI * WHEEL_RADIUS;
+//      distance = wheelRevolutions * circumference;
+//      wheelCount = currCount;
+//    }
     
     /* PRINTS INPUTS AND OUTPUTS */
     if(displayCount == 30) {
+      /* FOR DEBUGGING THE QRDs */
 //      printQRDs();
+      /* FOR DEBUGGING RECOGNIZING TURNS */
+//      LCD.clear(); LCD.home();
+//      if (negErrCount > 100){
+//        LCD.print("Right turn!");
+//      } else if (posErrCount > 100) {
+//        LCD.print("Left turn!");
+//      } else if (noErrCount > 100) {
+//        LCD.print("STRAIGHT ;)");
+//      }
+      /* FOR DEBUGGING THE CURRENT COUNT FOR RECOGNIZING TOP OF RAMP*/
       LCD.clear(); LCD.home();
-      if (negErrCount > 100){
-        LCD.print("Right turn!");
-      } else if (posErrCount > 100) {
-        LCD.print("Left turn!");
-      } else if (noErrCount > 100) {
-        LCD.print("STRAIGHT ;)");
-      }
+      LCD.print("Count: "); LCD.print(currCount);
       displayCount = 0; /* RESET */
     }
 
@@ -228,8 +244,7 @@ void aroundTank(Menu* menu) {
 
     /* When side QRD senses tape */
     if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 1000) {
-      motor.speed(LEFT_MOTOR, 0);
-      motor.speed(RIGHT_MOTOR, 0);
+      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       lastTickCount = currCount;
     }
 

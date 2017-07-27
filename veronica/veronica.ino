@@ -41,7 +41,6 @@ void loop() {
 
       gateStage();  /* GO FROM START TO START OF TANK */
       rampStage(leftCourse); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
-//      rightTurn(menu); /* RIGHT TURN ONTO THE TAPE AROUND THE TANK */
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       int countTo = 2; 
       /* NAVIGATE TO FIRST TICK MARK */
@@ -122,7 +121,7 @@ void getUserInput() {
     delay(100);
   }
   
-  if (command == 0 || command == 5) {
+  if (command == 0 || command == 5 || command == 7) {
     while (true) {
       /* use TOP_POT to toggle options, press START to select current option */
       leftCourse = 1 - knob(TOP_POT) * 2 / 1024;
@@ -146,8 +145,7 @@ void getUserInput() {
 void gateStage() { 
   
   bool gateStage = true;
-  bool sideQRDMethod = false; /* only relevant for gate stage */
-  tapeFollow(menu, gateStage, sideQRDMethod);
+  tapeFollow(menu, gateStage, leftCourse /*doesn't matter*/);
   
 }
 
@@ -160,23 +158,21 @@ void rampStage(bool leftCourse) {
 
 void tankStage() {
   
-  int tickCount = 0;
-
-  while (tickCount < 6) {
+  for(int tickCount = 0; tickCount < 6; tickCount++) {
 
     /* GO TO NEXT TICK */
     aroundTank(menu); 
-    tickCount++;
     
     /* PICK UP AGENT */
-    raiseArm();
-    delay(500);
-    closePincer();
-    delay(1500);
-    lowerArm();
-    delay(1000);
-    openPincer();
-    shake();  // might be unnecessary
+    delay(2000);
+//    raiseArm();
+//    delay(500);
+//    closePincer();
+//    delay(1500);
+//    lowerArm();
+//    delay(1000);
+//    openPincer();
+//    shake();  // might be unnecessary
     
   }
   
@@ -184,7 +180,7 @@ void tankStage() {
 
 void lineStage() { 
   
-  locateZipline();
+  locateZipline(leftCourse);
   
 }
 
