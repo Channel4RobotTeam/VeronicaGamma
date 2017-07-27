@@ -253,6 +253,11 @@ void aroundTank(Menu* menu) {
   }
 }
 
+/*
+ * 
+ * MISC HELPER FUNCTIONS
+ * 
+ */
 bool reachedTank() {
   return reachedTankVar;
 }
@@ -271,7 +276,11 @@ void recoverLostTape(Menu* menu, int currentError, int lastError) {
   }
 }
 
-/* HELPER FUNCTIONS FOR TAPE FOLLOWING */
+/*
+ * 
+ * TAPE FOLLOWING HELPER FUNCTIONS 
+ * 
+ */
 int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
   int currentError = 0;
   if (leftQRD > menu->thresh_left && rightQRD > menu->thresh_right) { /* COMPLETELY ON TAPE */
