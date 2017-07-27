@@ -97,30 +97,12 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
 
     /* DETERMINE WHETHER TURNING */
     if (posErrCount > 100 ){
-      turnValue = -1;
+      turnValue = -1; /* LEFT TURN */
     } else if (negErrCount > 100){
-      turnValue = +1;
+      turnValue = +1; /* RIGHT TURN */
     } else if (noErrCount > 100) {
       turnValue = 0 ;
     }
-
-    /* STOP WHEN RECOGNIZED ENTERING A TURN */
-//    if (lastTurnValue == 0 && turnValue == +1) {
-//      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//      LCD.clear(); LCD.home();
-//      LCD.print("started RIGHT");
-//      delay(2000);
-//    } else if (lastTurnValue == 0 && turnValue == -1) {
-//      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//      LCD.clear(); LCD.home();
-//      LCD.print("started LEFT");
-//      delay(2000);
-//    } else if (lastTurnValue != 0 && turnValue == 0) {
-//      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//      LCD.clear(); LCD.home();
-//      LCD.print("started STRAIGHT");
-//      delay(2000);
-//    }
 
     /* CORRECTION APPLICATION */
     correctionApplication(menu, correction);
@@ -129,41 +111,42 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       
       /* STAY STOPPED WHILE THE ALARM IS ON */
       // 1kHz high is disarmed, 10kHz high is alarmed
-      if(analogRead(ONEKHZ) < 100 || (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ) < 1023) /*&& analogRead(TENKHZ) > menu->thresh_tenkhz*/) { //change back to WHILE later
+      if(analogRead(ONEKHZ) < 100 && currCount > 1000 /*|| (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ) < 1023) && analogRead(TENKHZ) > menu->thresh_tenkhz*/) { //change back to WHILE later
         LCD.clear(); LCD.home();
         LCD.print("WAITING...");
-        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//        int j = 0;
-//        while (analogRead(ONEKHZ) < 100 || (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ)) < 1023){
-//          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//          j = j + 1;
-//          if (j == 30) {
-//            LCD.setCursor(0,1);
-//            LCD.print("1kHz: "); LCD.print(analogRead(ONEKHZ));
-//            j = 0;
-//          }
-//        }
-        delay(2000);
+        int j = 0;
+        while (analogRead(ONEKHZ) < 100 /*|| (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ)) < 1023*/){
+          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+          j = j + 1;
+          if (j == 30) {
+            LCD.setCursor(0,1);
+            LCD.print("1kHz: "); LCD.print(analogRead(ONEKHZ));
+            j = 0;
+          }
+        }
         break; /* GATE STAGE ENDS WHEN DOOR DISARMS */
       }
       
     } else { /* RAMP STAGE */
       
       /* RECOGNIZE WHEN THE TOP OF THE RAMP IS REACHED */
-      if (leftQRD > 500 && rightQRD > 500 && !topOfRamp && currCount < 30000){
+//      if (leftQRD > 500 && rightQRD > 500 && !topOfRamp && currCount > 30000){
+//        topOfRamp = true;
+//      }
+      if (analogRead(RAMP_SWITCH) == 0){
         topOfRamp = true;
       }
-
+      
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
       if (leftCourse && topOfRamp){
-        if (negErrCount > 100){ /* LEFT TURN INTO TANK */
+        if (negErrCount > 100){ /* RIGHT TURN INTO TANK */
           motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
           delay(500);
           rightTurn(menu);
           break;
         }
       } else if (!leftCourse && topOfRamp) { /* RIGHT COURSE */
-        if (posErrCount > 100){ /* RIGHT TURN INTO TANK */
+        if (posErrCount > 100){ /* LEFT TURN INTO TANK */
           motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
           delay(500);
           break;
@@ -171,14 +154,6 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       }
       
     }
-
-    /* UPDATES DISTANCE WHEN WHEEL QRD SEES TAPE */
-//    if(wheelQRD < THRESH_WHEEL && (currCount - wheelCount) > 100) {
-//      wheelRevolutions = wheelRevolutions + 1;
-//      double circumference = 2 * PI * WHEEL_RADIUS;
-//      distance = wheelRevolutions * circumference;
-//      wheelCount = currCount;
-//    }
     
     /* PRINTS INPUTS AND OUTPUTS */
     if(displayCount == 30) {
@@ -193,8 +168,10 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
 //      } else if (noErrCount > 100) {
 //        LCD.print("STRAIGHT ;)");
 //      }
-      /* FOR DEBUGGING THE CURRENT COUNT FOR RECOGNIZING TOP OF RAMP*/
+      /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
       LCD.clear(); LCD.home();
+      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
+      LCD.setCursor(0,1);
       LCD.print("Count: "); LCD.print(currCount);
       displayCount = 0; /* RESET */
     }

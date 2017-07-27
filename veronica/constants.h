@@ -14,7 +14,7 @@
 #define BOT_POT 7
 
 /* DIGITAL INPUTS */
-#define BASKET_SWITCH 0
+#define RAMP_SWITCH 0
 
 /* MOTOR OUTPUTS */
 #define RIGHT_MOTOR 0
