@@ -10,13 +10,12 @@
 #include "menu.h"
 
 /* FUNCTION DECLARATIONS */
-void locateZipline();
+void locateZipline(bool leftCourse);
 void rightTurn(Menu* menu);
+void backUp();
 
-bool right = true;
-int turnCount = 0;
-
-void locateZipline() {
+/* Drives straight forward until senses 10kHz signal and then stops */
+void locateZipline(bool leftCourse) {
   
   int count = 0;
   
@@ -28,6 +27,9 @@ void locateZipline() {
       if (switch0 == 0) { break; } 
     }
 
+    /* INPUTS */
+    int signal10kHz = analogRead(TENKHZ);
+  
     count = count + 1;
     if(count == 30) {
       LCD.clear(); LCD.home();
@@ -36,25 +38,33 @@ void locateZipline() {
       count = 0;
     }
 
-    motor.speed(LEFT_MOTOR, VELOCITY-50);
-    motor.speed(RIGHT_MOTOR, VELOCITY-50);
-
-    int signal10kHz = analogRead(TENKHZ);
-
-    if(signal10kHz > THRESH_TENKHZ) {
-      motor.speed(LEFT_MOTOR, 0);
-      motor.speed(RIGHT_MOTOR, 0);
-      delay(3000);
-      break;
+    /* IF ON LEFT COURSE */
+    if(leftCourse) {
+      motor.speed(LEFT_MOTOR, VELOCITY-50);
+      motor.speed(RIGHT_MOTOR, VELOCITY-50);
+  
+      if(signal10kHz > THRESH_TENKHZ) {
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, 0);
+        delay(3000);
+        break;
+      }
+    } else { /* IF ON RIGHT COURSE */
+      // TODO: go to middle tick mark && drive on angle to zipline?
     }
   }
   
 }
 
+/* Continues to turn right until robot sees tape */
 void rightTurn(Menu* menu) {
+  
+  int displayCount = 0;
   int count = 0;
   
   while(true) {
+    count = count + 1;
+    
     /* Press YELLOW RESET to switch to user input menu */
     int switch0 = digitalRead(0);
     if (switch0 == 0) { 
@@ -66,18 +76,18 @@ void rightTurn(Menu* menu) {
     int leftQRD = analogRead(LEFT_QRD);
     int rightQRD = analogRead(RIGHT_QRD);
     
-    count = count + 1;
-    if(count == 30) {
+    displayCount = displayCount + 1;
+    if(displayCount == 30) {
       LCD.clear(); LCD.home();
       LCD.print("RIGHT TURN");
       LCD.setCursor(0,1); LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
-      count = 0;
+      displayCount = 0;
     }
     
     motor.speed(LEFT_MOTOR, VELOCITY-50);
     motor.speed(RIGHT_MOTOR, -75);
 
-    if(leftQRD > menu->thresh_left || rightQRD > menu->thresh_right) {
+    if(count > 300 && (leftQRD > menu->thresh_left || rightQRD > menu->thresh_right)) {
       motor.speed(LEFT_MOTOR, 0);
       motor.speed(RIGHT_MOTOR, 0);
       delay(1000);
@@ -85,5 +95,19 @@ void rightTurn(Menu* menu) {
     }
   }
   
+}
+
+/* Backs up for 1000 loops */ //TODO: check how far this number of loops corresponds to
+void backUp() {
+  int count = 0;
+
+  while(count < 1000) {
+    motor.speed(LEFT_MOTOR, -75);
+    motor.speed(RIGHT_MOTOR, -75);
+  }
+
+  motor.speed(LEFT_MOTOR, 0);
+  motor.speed(RIGHT_MOTOR, 0);
+  delay(2000);
 }
 
