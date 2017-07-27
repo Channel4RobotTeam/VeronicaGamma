@@ -74,7 +74,7 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
     displayCount = displayCount + 1;
     
     /* Press YELLOW RESET to switch to user input menu */
-    switch0 = digitalRead(0);
+    switch0 = digitalRead(YELLOWBUTTON);
     if (switch0 == 0) { 
       delay(1000); 
       if (switch0 == 0) { break; } 
@@ -203,7 +203,7 @@ void aroundTank(Menu* menu) {
     sideQRD = analogRead(SIDE_QRD);
 
     /* Press YELLOW RESET to switch to user input menu */
-    switch0 = digitalRead(0);
+    switch0 = digitalRead(YELLOWBUTTON);
     if (switch0 == 0) { 
       delay(1000); 
       if (switch0 == 0) { break; } 
