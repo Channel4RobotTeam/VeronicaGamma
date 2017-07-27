@@ -71,7 +71,7 @@ void loop() {
       lowerArm();
       delay(1000);
       openPincer();
-      shake();  // might be unnecessary
+//      shake();  // might be unnecessary
     } break; 
     
     case 4: { gateStage(); } break; /* GATE STAGE */
