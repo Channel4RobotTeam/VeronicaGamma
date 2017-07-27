@@ -67,6 +67,7 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
   wheelCount = 0;
   bool topOfRamp = false;
   bool onRamp = false;
+  int turnCount = 0;
 
   /* MAIN LOOP */
   while (true) {
@@ -136,29 +137,45 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       if (analogRead(RAMP_SWITCH) == 0){
         topOfRamp = true;
       }
-      
+
+      if (displayCount == 30 && topOfRamp){
+        LCD.clear(); LCD.home(); 
+        LCD.print("TOP OF RAMP");
+      }
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
       if (leftCourse && topOfRamp){
         if (negErrCount > 100){ /* RIGHT TURN INTO TANK */
-          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-          delay(500);
-          rightTurn(menu);
-          break;
+          if (turnCount < 3){
+            turnCount = turnCount + 1;
+          } else {
+            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+            LCD.clear(); LCD.home();
+            LCD.print("RIGHT TURN");
+            delay(2000);
+            rightTurn(menu);
+            break;
+          }
         }
       } else if (!leftCourse && topOfRamp) { /* RIGHT COURSE */
         if (posErrCount > 100){ /* LEFT TURN INTO TANK */
-          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-          delay(500);
-          break;
+          if (turnCount < 3){
+            turnCount = turnCount + 1;
+          } else {
+            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+            LCD.clear(); LCD.home();
+            LCD.print("LEFT TURN");
+            delay(2000);
+            break;
+          }
         }
       }
       
     }
     
     /* PRINTS INPUTS AND OUTPUTS */
-    if(displayCount == 30) {
+    if(displayCount == 30 && !topOfRamp) {
       /* FOR DEBUGGING THE QRDs */
-//      printQRDs();
+      printQRDs();
       /* FOR DEBUGGING RECOGNIZING TURNS */
 //      LCD.clear(); LCD.home();
 //      if (negErrCount > 100){
@@ -169,11 +186,11 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
 //        LCD.print("STRAIGHT ;)");
 //      }
       /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
-      LCD.clear(); LCD.home();
-      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
-      LCD.setCursor(0,1);
-      LCD.print("Count: "); LCD.print(currCount);
-      displayCount = 0; /* RESET */
+//      LCD.clear(); LCD.home();
+//      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
+//      LCD.setCursor(0,1);
+//      LCD.print("Count: "); LCD.print(currCount);
+//      displayCount = 0; /* RESET */
     }
 
     lastTurnValue = turnValue;
