@@ -12,8 +12,6 @@
 /* FUNCTIONS DECLARATIONS */
 void tapeFollow(Menu* menu);
 void aroundTank(Menu* menu);
-bool reachedTank();
-double getDistance();
 void recoverLostTape(Menu* menu, int currentError, int lastError);
 
 /* HELPER FUNCTIONS */
@@ -33,19 +31,13 @@ int posErrCount = 0;
 int negErrCount = 0;
 int noErrCount = 0;
 
-// QRDs & button
+// QRDs & yellow button
 int leftQRD;
 int rightQRD;
 int sideQRD;
 int frontQRD;
-int switch0 = digitalRead(0);
-
-/* DISTANCE TRACKING VARIABLES */
-// if distance tracking is not needed inside aroundTank() then put these variables in tapeFollow function
 int wheelQRD;
-double distance = 0;
-int wheelCount = 0;
-int wheelRevolutions = 0;
+int switch0 = digitalRead(0);
 
 /* TANK VARIABLES */
 bool reachedTankVar = false;
@@ -59,12 +51,8 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
 
   int turnValue = 0;
   int lastTurnValue = 0;
-  
   currCount = 0;
   displayCount = 0;
-  distance = 0;
-  wheelRevolutions = 0;
-  wheelCount = 0;
   bool topOfRamp = false;
   bool onRamp = false;
   int turnCount = 0;
@@ -112,11 +100,11 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       
       /* STAY STOPPED WHILE THE ALARM IS ON */
       // 1kHz high is disarmed, 10kHz high is alarmed
-      if(analogRead(ONEKHZ) < 100 && currCount > 1000 /*|| (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ) < 1023) && analogRead(TENKHZ) > menu->thresh_tenkhz*/) { //change back to WHILE later
+      if(analogRead(ONEKHZ) < 100 && currCount > 1000) { 
         LCD.clear(); LCD.home();
         LCD.print("WAITING...");
         int j = 0;
-        while (analogRead(ONEKHZ) < 100 /*|| (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ)) < 1023*/){
+        while (analogRead(ONEKHZ) < 100){
           motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
           j = j + 1;
           if (j == 30) {
@@ -134,13 +122,14 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
 //      if (leftQRD > 500 && rightQRD > 500 && !topOfRamp && currCount > 30000){
 //        topOfRamp = true;
 //      }
-      if (analogRead(RAMP_SWITCH) == 0){
+      if (analogRead(RAMP_SWITCH) == 0) {
         topOfRamp = true;
       }
 
-      if (displayCount == 30 && topOfRamp){
+      if (displayCount == 30 && topOfRamp) {
         LCD.clear(); LCD.home(); 
         LCD.print("TOP OF RAMP");
+        displayCount = 0; /* RESET */
       }
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
       if (leftCourse && topOfRamp){
@@ -190,7 +179,7 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
 //      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
 //      LCD.setCursor(0,1);
 //      LCD.print("Count: "); LCD.print(currCount);
-//      displayCount = 0; /* RESET */
+      displayCount = 0; /* RESET */
     }
 
     lastTurnValue = turnValue;
@@ -248,6 +237,7 @@ void aroundTank(Menu* menu) {
     if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 1000) {
       motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       lastTickCount = currCount;
+      break;
     }
 
     lastErr = currErr;
@@ -260,14 +250,6 @@ void aroundTank(Menu* menu) {
  * MISC HELPER FUNCTIONS
  * 
  */
-bool reachedTank() {
-  return reachedTankVar;
-}
-
-double getDistance() {
-  return distance;
-}
-
 void recoverLostTape(Menu* menu, int currentError, int lastError) {
   if(currentError < 0) {
     motor.speed(LEFT_MOTOR, menu->velocity+25);

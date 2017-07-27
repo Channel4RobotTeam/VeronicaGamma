@@ -122,8 +122,31 @@ void backUp() {
   int count = 0;
 
   while(count < 1000) {
+    count = count + 1;
     motor.speed(LEFT_MOTOR, -75);
     motor.speed(RIGHT_MOTOR, -75);
+  }
+
+  motor.speed(LEFT_MOTOR, 0);
+  motor.speed(RIGHT_MOTOR, 0);
+  delay(2000);
+  
+}
+
+
+/* 
+ *  
+ *  Drives forward for 1000 loops
+ *  
+ */
+void driveForward() {
+
+  int count = 0;
+
+  while(count < 1000) {
+    count = count + 1;
+    motor.speed(LEFT_MOTOR, VELOCITY - 25);
+    motor.speed(RIGHT_MOTOR, VELOCITY - 25);
   }
 
   motor.speed(LEFT_MOTOR, 0);

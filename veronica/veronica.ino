@@ -181,6 +181,8 @@ void tankStage() {
 void lineStage() { 
   
   locateZipline(leftCourse);
+  backUp(); //might not be required
+  driveForward(); //also might not be required
   
 }
 
