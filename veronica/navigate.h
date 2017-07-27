@@ -14,7 +14,13 @@ void locateZipline(bool leftCourse);
 void rightTurn(Menu* menu);
 void backUp();
 
-/* Drives straight forward until senses 10kHz signal and then stops */
+
+
+/* 
+ *  
+ *  Drives straight forward until senses 10kHz signal and then stops 
+ *  
+ */
 void locateZipline(bool leftCourse) {
   
   int count = 0;
@@ -56,7 +62,13 @@ void locateZipline(bool leftCourse) {
   
 }
 
-/* Continues to turn right until robot sees tape */
+
+
+/* 
+ *  
+ *  Continues to turn right until robot sees tape 
+ *  
+ */
 void rightTurn(Menu* menu) {
   
   int displayCount = 0;
@@ -97,8 +109,16 @@ void rightTurn(Menu* menu) {
   
 }
 
-/* Backs up for 1000 loops */ //TODO: check how far this number of loops corresponds to
+
+
+/* 
+ *  
+ *  Backs up for 1000 loops 
+ *  
+ */ 
+//TODO: check how far this number of loops corresponds to
 void backUp() {
+  
   int count = 0;
 
   while(count < 1000) {
@@ -109,5 +129,6 @@ void backUp() {
   motor.speed(LEFT_MOTOR, 0);
   motor.speed(RIGHT_MOTOR, 0);
   delay(2000);
+  
 }
 
