@@ -105,22 +105,22 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
     }
 
     /* STOP WHEN RECOGNIZED ENTERING A TURN */
-    if (lastTurnValue == 0 && turnValue == +1) {
-      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-      LCD.clear(); LCD.home();
-      LCD.print("started RIGHT");
-      delay(2000);
-    } else if (lastTurnValue == 0 && turnValue == -1) {
-      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-      LCD.clear(); LCD.home();
-      LCD.print("started LEFT");
-      delay(2000);
-    } else if (lastTurnValue != 0 && turnValue == 0) {
-      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-      LCD.clear(); LCD.home();
-      LCD.print("started STRAIGHT");
-      delay(2000);
-    }
+//    if (lastTurnValue == 0 && turnValue == +1) {
+//      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//      LCD.clear(); LCD.home();
+//      LCD.print("started RIGHT");
+//      delay(2000);
+//    } else if (lastTurnValue == 0 && turnValue == -1) {
+//      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//      LCD.clear(); LCD.home();
+//      LCD.print("started LEFT");
+//      delay(2000);
+//    } else if (lastTurnValue != 0 && turnValue == 0) {
+//      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//      LCD.clear(); LCD.home();
+//      LCD.print("started STRAIGHT");
+//      delay(2000);
+//    }
 
     /* CORRECTION APPLICATION */
     correctionApplication(menu, correction);
@@ -132,30 +132,38 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       if(analogRead(ONEKHZ) < 100 || (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ) < 1023) /*&& analogRead(TENKHZ) > menu->thresh_tenkhz*/) { //change back to WHILE later
         LCD.clear(); LCD.home();
         LCD.print("WAITING...");
-        while (analogRead(ONEKHZ) < 100 || (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ)) < 1023){
-          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-        }
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//        int j = 0;
+//        while (analogRead(ONEKHZ) < 100 || (analogRead(ONEKHZ) > 600 && analogRead(ONEKHZ)) < 1023){
+//          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//          j = j + 1;
+//          if (j == 30) {
+//            LCD.setCursor(0,1);
+//            LCD.print("1kHz: "); LCD.print(analogRead(ONEKHZ));
+//            j = 0;
+//          }
+//        }
+        delay(2000);
         break; /* GATE STAGE ENDS WHEN DOOR DISARMS */
       }
       
     } else { /* RAMP STAGE */
       
       /* RECOGNIZE WHEN THE TOP OF THE RAMP IS REACHED */
-//      if (leftQRD > 500 && rightQRD > 500 && !topOfRamp && currCount < 10000){
-//        menu->velocity = 60;
-//        topOfRamp = true;
-//      }
+      if (leftQRD > 500 && rightQRD > 500 && !topOfRamp && currCount < 30000){
+        topOfRamp = true;
+      }
 
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
       if (leftCourse && topOfRamp){
-        if (posErrCount > 100){ /* LEFT TURN INTO TANK */
+        if (negErrCount > 100){ /* LEFT TURN INTO TANK */
           motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
           delay(500);
           rightTurn(menu);
           break;
         }
       } else if (!leftCourse && topOfRamp) { /* RIGHT COURSE */
-        if (negErrCount > 100){ /* RIGHT TURN INTO TANK */
+        if (posErrCount > 100){ /* RIGHT TURN INTO TANK */
           motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
           delay(500);
           break;
