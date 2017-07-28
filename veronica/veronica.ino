@@ -187,10 +187,11 @@ void tankStage() {
 
 void lineStage() { 
   
-//  locateZipline(leftCourse);
-  backUp(); //might not be required
-  delay(2000);
-  driveForward(); //also might not be required
+  locateZipline(leftCourse); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
+  backUp(); /* REALIGNS */
+  raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
+  driveForward(); /* DRIVES THE BASKET ONTO THE ZIPLINE */
+  lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
   
 }
 

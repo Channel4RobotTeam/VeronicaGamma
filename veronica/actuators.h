@@ -55,4 +55,49 @@ void shake(){
   RCServo0.write(0);
 }
 
+void raiseLift(){
+
+  int pos = 90;
+  unsigned long start = millis();
+  RCServo2.write(pos); /* REST POSITION */
+
+  LCD.clear(); LCD.home();
+  LCD.print("RAISING");
+  
+  /* RAISE THE LIFT */
+  while (millis() - start > 10000) { /* TODO find proper duration */
+    if (pos != 60){
+      RCServo2.write(pos);
+      pos = pos - 1;
+      delay(100);
+    } else {
+      RCServo2.write(90);
+      pos = 90;
+    }
+  }
+  
+}
+
+void lowerLift(){
+
+  int pos = 90;
+  unsigned long start = millis();
+  RCServo2.write(pos); /* REST POSITION */
+
+  LCD.clear(); LCD.home();
+  LCD.print("LOWERING");
+
+  /* LOWER THE LIFT */
+  while (millis() - start > 8000){ /* TODO find proper duration */
+    if (pos != 100){
+      RCServo2.write(pos);
+      pos = pos + 1;
+      delay(100);
+    } else {
+      RCServo2.write(90);
+      pos = 90;
+    }
+  }
+  
+}
 
