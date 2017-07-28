@@ -56,7 +56,12 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
   bool topOfRamp = false;
   bool onRamp = false;
   int turnCount = 0;
-
+  unsigned long startTime = millis();
+  int proportional = 0;
+  int integral = 0;
+  int derivative = 0;
+  int maxIntegral = 60; 
+  
   /* MAIN LOOP */
   while (true) {
     currCount = currCount + 1;
@@ -79,9 +84,14 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
     int currErr = tapeError(menu, rightQRD, leftQRD, lastErr);
     
     /* CORRECTION CALCULATION */
-    int proportional = currErr * menu->kp;
-    int integral = 0 * menu->ki;
-    int derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd;
+    proportional = currErr * menu->kp;
+//    integral = currErr * (currCount - lastCount) * menu->ki + integral;
+//    if (integral > maxIntegral) {
+//      integral = maxIntegral;
+//    } else if (integral < 0){
+//      integral = 0;
+//    }
+    derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd;
     int correction = proportional + integral + derivative;
 
     /* DETERMINE WHETHER TURNING */
@@ -100,7 +110,7 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       
       /* STAY STOPPED WHILE THE ALARM IS ON */
       // 1kHz high is disarmed, 10kHz high is alarmed
-      if(analogRead(ONEKHZ) < 100 && currCount > 1000) { 
+      if(analogRead(ONEKHZ) < 100 && (millis() - startTime) > 3500) { 
         LCD.clear(); LCD.home();
         LCD.print("WAITING...");
         int j = 0;
@@ -113,13 +123,14 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
             j = 0;
           }
         }
+        delay(2000);
         break; /* GATE STAGE ENDS WHEN DOOR DISARMS */
       }
       
     } else { /* RAMP STAGE */
       
       /* RECOGNIZE WHEN THE TOP OF THE RAMP IS REACHED */
-      if (analogRead(RAMP_SWITCH) == 0) {
+      if (digitalRead(RAMP_SWITCH) == 0) {
         topOfRamp = true;
       }
 
@@ -128,25 +139,50 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
         LCD.print("TOP OF RAMP");
         displayCount = 0; /* RESET */
       }
+
+      if (leftCourse) { 
+        if (lastTurnValue == +1 && turnValue == 0){
+          turnCount = turnCount + 1;
+        } 
+      } else {
+        if (lastTurnValue = -1 && turnValue == 0){
+          turnCount = turnCount + 1;
+        }
+      }
+      
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
-      if (leftCourse && topOfRamp) {
-        if (turnValue = +1) { /* RIGHT TURN INTO TANK */
-          if (turnCount < 3) {
-            turnCount = turnCount + 1;
-          } else {
-            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-            LCD.clear(); LCD.home();
-            LCD.print("RIGHT TURN");
-            delay(2000);
-            rightTurn(menu);
-            break;
-          }
+      if (leftCourse && topOfRamp){
+//        if (turnValue = +1){ /* RIGHT TURN INTO TANK */
+//          if (turnCount < 3){
+//            turnCount = turnCount + 1;
+//          } else {
+//            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//            LCD.clear(); LCD.home();
+//            LCD.print("RIGHT TURN");
+//            delay(2000);
+//            rightTurn(menu);
+//            break;
+//          }
+        if (turnCount >= 2){
+          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+          LCD.clear(); LCD.home();
+          LCD.print("RIGHT TURN");
+          delay(2000);
+          rightTurn(menu);
+          break;
         }
       } else if (!leftCourse && topOfRamp) { /* RIGHT COURSE */
-        if (turnValue = -1) { /* LEFT TURN INTO TANK */
-          if (turnCount < 3) {
-            turnCount = turnCount + 1;
-          } else {
+        if (turnValue = -1){ /* LEFT TURN INTO TANK */
+//          if (turnCount < 3){
+//            turnCount = turnCount + 1;
+//          } else {
+//            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//            LCD.clear(); LCD.home();
+//            LCD.print("LEFT TURN");
+//            delay(2000);
+//            break;
+//          }
+          if (turnCount >= 2){
             motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
             LCD.clear(); LCD.home();
             LCD.print("LEFT TURN");
@@ -195,6 +231,10 @@ void aroundTank(Menu* menu) {
   currCount = 0;
   displayCount = 0;
   int lastTickCount = 0;
+  int proportional = 0;
+  int integral = 0;
+  int derivative = 0;
+  int maxIntegral = 60;
   
   while (true) {
     currCount = currCount + 1; 
@@ -216,9 +256,14 @@ void aroundTank(Menu* menu) {
     int currErr = tankError(menu, rightQRD, leftQRD, lastErr);
 
     /* CORRECTION CALCULATION */
-    int proportional = currErr * menu->kp_circle;
-    int integral = 0 * menu->ki_circle;
-    int derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd_circle;
+    proportional = currErr * menu->kp_circle;
+//    integral = currErr * (currCount - lastCount) * menu->ki + integral;
+//    if (integral > maxIntegral) {
+//      integral = maxIntegral;
+//    } else if (integral < 0){
+//      integral = 0;
+//    }
+    derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd_circle;
     int correction = proportional + integral + derivative;
 
     /* CORRECTION APPLICATION */
@@ -265,9 +310,9 @@ void recoverLostTape(Menu* menu, int currentError, int lastError) {
 int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
   int currentError = 0;
   if (leftQRD > menu->thresh_left && rightQRD > menu->thresh_right) { /* COMPLETELY ON TAPE */
+    noErrCount = noErrCount + 1;
     negErrCount = 0;
     posErrCount = 0;
-    noErrCount = noErrCount + 1;
   }
   if (leftQRD < menu->thresh_left && rightQRD > menu->thresh_right) { /* SLIGHTLY LEFT OF TAPE */ 
     currentError = -1;
@@ -281,13 +326,13 @@ int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
   } 
   else if (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right) { /* SLIGHTLY RIGHT OF TAPE */ 
     currentError = 1; 
+    offTapeCount = 0;
     if (noErrCount > 0) {
       noErrCount = noErrCount + 1;
     } else {
       posErrCount = posErrCount + 1;
     }
     negErrCount = 0;
-    offTapeCount = 0;
   } 
   else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right){ /* COMPLETELY OFF TAPE */
     if (lastError < 0) { // OFF TO LEFT
@@ -298,8 +343,8 @@ int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
     } 
     else if(lastError > 0) { // OFF TO RIGHT
       currentError = 2; 
-      negErrCount = 0;
       posErrCount = posErrCount + 1;
+      negErrCount = 0;
       noErrCount = 0;
     }
     offTapeCount = offTapeCount + 1;
@@ -321,7 +366,7 @@ int tankError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
   } 
   else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right) { /* COMPLETELY OFF TAPE */
     if(lastError == 0 || lastError > 0) { currentError = 3; } // extremely right of desired position
-    else { currentError = 0; }
+    else { currentError = -1; }
   }
 
   return currentError;
@@ -346,14 +391,13 @@ void printQRDs() {
   LCD.clear(); LCD.home();
   LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(", R: "); LCD.print(analogRead(RIGHT_QRD));
   LCD.setCursor(0,1);
-  LCD.print("W: "); LCD.print(analogRead(WHEEL_QRD)); LCD.print(", S: "); LCD.print(analogRead(SIDE_QRD)); 
-  LCD.print(" "); LCD.print(digitalRead(RAMP_SWITCH));
+  LCD.print(", S: "); LCD.print(analogRead(SIDE_QRD)); LCD.print(" "); LCD.print(digitalRead(RAMP_SWITCH));
 }
 
 void printFreq() {
   LCD.clear(); LCD.home();
-  LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(", R: "); LCD.print(analogRead(RIGHT_QRD));
+  LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(" R: "); LCD.print(analogRead(RIGHT_QRD));
   LCD.setCursor(0,1);
-  LCD.print("1: "); LCD.print(analogRead(ONEKHZ)); LCD.print(", 10: "); LCD.print(analogRead(TENKHZ));  
+  LCD.print("1: "); LCD.print(analogRead(ONEKHZ)); LCD.print(" 10: "); LCD.print(analogRead(TENKHZ));  
 }
 

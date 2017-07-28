@@ -120,11 +120,13 @@ void rightTurn(Menu* menu) {
 void backUp() {
   
   int count = 0;
+  unsigned long start = millis();
 
-  while(count < 1000) {
+  while(millis() - start < 1000) {
     count = count + 1;
     motor.speed(LEFT_MOTOR, -75);
     motor.speed(RIGHT_MOTOR, -75);
+    delay(100);
   }
 
   motor.speed(LEFT_MOTOR, 0);
@@ -142,11 +144,13 @@ void backUp() {
 void driveForward() {
 
   int count = 0;
+  unsigned long start = millis();
 
-  while(count < 1000) {
+  while(millis() - start < 1000) {
     count = count + 1;
     motor.speed(LEFT_MOTOR, VELOCITY - 25);
     motor.speed(RIGHT_MOTOR, VELOCITY - 25);
+    delay(100);
   }
 
   motor.speed(LEFT_MOTOR, 0);

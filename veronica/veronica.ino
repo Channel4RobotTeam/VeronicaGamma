@@ -71,7 +71,7 @@ void loop() {
       lowerArm();
       delay(1000);
       openPincer();
-//      shake();  // might be unnecessary
+      shake();  // might be unnecessary
     } break; 
     
     case 4: { gateStage(); } break; /* GATE STAGE */
@@ -165,13 +165,13 @@ void tankStage() {
     
     /* PICK UP AGENT */
     delay(2000);
-//    raiseArm();
-//    delay(500);
-//    closePincer();
-//    delay(1500);
-//    lowerArm();
-//    delay(1000);
-//    openPincer();
+    raiseArm();
+    delay(500);
+    closePincer();
+    delay(1500);
+    lowerArm();
+    delay(1000);
+    openPincer();
 //    shake();  // might be unnecessary
     
   }
@@ -180,8 +180,9 @@ void tankStage() {
 
 void lineStage() { 
   
-  locateZipline(leftCourse);
+//  locateZipline(leftCourse);
   backUp(); //might not be required
+  delay(2000);
   driveForward(); //also might not be required
   
 }

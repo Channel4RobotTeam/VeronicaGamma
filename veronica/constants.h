@@ -33,10 +33,10 @@
 #define LINE_STAGE 3
 
 /* DEFAULTS MENU VALUES */
-#define VELOCITY 125
-#define KP 43
-#define KI 0
-#define KD 79
+#define VELOCITY 160
+#define KP 50
+#define KI 5
+#define KD 80
 #define KP_CIRCLE 40
 #define KI_CIRCLE 0
 #define KD_CIRCLE 75
