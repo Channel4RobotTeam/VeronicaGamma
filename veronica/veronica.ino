@@ -160,6 +160,13 @@ void tankStage() {
   
   for(int tickCount = 0; tickCount < 6; tickCount++) {
 
+    /* Press YELLOW RESET to switch to user input menu */
+    int switch0 = digitalRead(YELLOWBUTTON);
+    if (switch0 == 0) { 
+      delay(1000); 
+      if (switch0 == 0) { break; } 
+    }
+
     /* GO TO NEXT TICK */
     aroundTank(menu); 
     

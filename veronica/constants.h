@@ -9,7 +9,7 @@
 #define SIDE_QRD 2
 #define ONEKHZ 3
 #define TENKHZ 4
-#define WHEEL_QRD 5
+#define SIDE_RIGHT_QRD 5
 #define TOP_POT 6
 #define BOT_POT 7
 
@@ -46,3 +46,4 @@
 #define THRESH_FRONT 900
 #define THRESH_ONEKHZ 900
 #define THRESH_TENKHZ 300
+#define THRESH_SIDE_RIGHT 400

@@ -37,6 +37,7 @@ int rightQRD;
 int sideQRD;
 int frontQRD;
 int wheelQRD;
+int sideRightQRD;
 int switch0 = digitalRead(0);
 
 /* TANK VARIABLES */
@@ -78,7 +79,7 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
     leftQRD = analogRead(LEFT_QRD);
     rightQRD = analogRead(RIGHT_QRD);
     sideQRD = analogRead(SIDE_QRD);
-    wheelQRD = analogRead(WHEEL_QRD);
+    sideRightQRD = analogRead(SIDE_RIGHT_QRD);
 
     /* ERROR */
     int currErr = tapeError(menu, rightQRD, leftQRD, lastErr);
@@ -137,6 +138,7 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       if (displayCount == 30 && topOfRamp) {
         LCD.clear(); LCD.home(); 
         LCD.print("TOP OF RAMP");
+        LCD.setCursor(0,1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
         displayCount = 0; /* RESET */
       }
 
@@ -151,47 +153,56 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       }
       
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
-      if (leftCourse && topOfRamp){
-//        if (turnValue = +1){ /* RIGHT TURN INTO TANK */
-//          if (turnCount < 3){
-//            turnCount = turnCount + 1;
-//          } else {
-//            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//            LCD.clear(); LCD.home();
-//            LCD.print("RIGHT TURN");
-//            delay(2000);
-//            rightTurn(menu);
-//            break;
-//          }
-        if (turnCount >= 2){
+        if(topOfRamp && sideRightQRD > THRESH_SIDE_RIGHT) {
           motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
           LCD.clear(); LCD.home();
-          LCD.print("RIGHT TURN");
-          delay(2000);
+          LCD.print("TANK");
+          LCD.setCursor(0, 1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
+          delay(3000);
           rightTurn(menu);
           break;
         }
-      } else if (!leftCourse && topOfRamp) { /* RIGHT COURSE */
-        if (turnValue = -1){ /* LEFT TURN INTO TANK */
-//          if (turnCount < 3){
-//            turnCount = turnCount + 1;
-//          } else {
+//      if (leftCourse && topOfRamp){
+////        if (turnValue = +1){ /* RIGHT TURN INTO TANK */
+////          if (turnCount < 3){
+////            turnCount = turnCount + 1;
+////          } else {
+////            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+////            LCD.clear(); LCD.home();
+////            LCD.print("RIGHT TURN");
+////            delay(2000);
+////            rightTurn(menu);
+////            break;
+////          }
+//        if (turnCount >= 2){
+//          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//          LCD.clear(); LCD.home();
+//          LCD.print("RIGHT TURN");
+//          delay(2000);
+//          rightTurn(menu);
+//          break;
+//        }
+//      } else if (!leftCourse && topOfRamp) { /* RIGHT COURSE */
+//        if (turnValue = -1){ /* LEFT TURN INTO TANK */
+////          if (turnCount < 3){
+////            turnCount = turnCount + 1;
+////          } else {
+////            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+////            LCD.clear(); LCD.home();
+////            LCD.print("LEFT TURN");
+////            delay(2000);
+////            break;
+////          }
+//          if (turnCount >= 2){
 //            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
 //            LCD.clear(); LCD.home();
 //            LCD.print("LEFT TURN");
 //            delay(2000);
 //            break;
 //          }
-          if (turnCount >= 2){
-            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-            LCD.clear(); LCD.home();
-            LCD.print("LEFT TURN");
-            delay(2000);
-            break;
-          }
-        }
-      }
-      
+//        }
+//      }
+//      
     }
     
     /* PRINTS INPUTS AND OUTPUTS */
@@ -244,6 +255,7 @@ void aroundTank(Menu* menu) {
     leftQRD = analogRead(LEFT_QRD);
     rightQRD = analogRead(RIGHT_QRD);
     sideQRD = analogRead(SIDE_QRD);
+    sideRightQRD = analogRead(SIDE_RIGHT_QRD);
 
     /* Press YELLOW RESET to switch to user input menu */
     switch0 = digitalRead(YELLOWBUTTON);
@@ -366,7 +378,7 @@ int tankError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
   } 
   else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right) { /* COMPLETELY OFF TAPE */
     if(lastError == 0 || lastError > 0) { currentError = 3; } // extremely right of desired position
-    else { currentError = -1; }
+    else { currentError = -2; }
   }
 
   return currentError;
@@ -391,7 +403,7 @@ void printQRDs() {
   LCD.clear(); LCD.home();
   LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(", R: "); LCD.print(analogRead(RIGHT_QRD));
   LCD.setCursor(0,1);
-  LCD.print(", S: "); LCD.print(analogRead(SIDE_QRD)); LCD.print(" "); LCD.print(digitalRead(RAMP_SWITCH));
+  LCD.print("SR:"); LCD.print(analogRead(SIDE_RIGHT_QRD)); LCD.print(",S: "); LCD.print(analogRead(SIDE_QRD)); LCD.print(" "); LCD.print(digitalRead(RAMP_SWITCH));
 }
 
 void printFreq() {
