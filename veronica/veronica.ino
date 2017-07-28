@@ -28,6 +28,7 @@ Menu* menu = new Menu();
 void setup() {
   #include <phys253setup.txt>
   Serial.begin(9600);
+  RCServo2.write(90);
   getUserInput();
 }
 
@@ -84,8 +85,14 @@ void loop() {
 
     case 8: { /* MISC TEST */ 
       while (true) {
-        printQRDs();
-        delay(50);
+        if (startbutton()){
+          delay(100);
+          if (startbutton()){ raiseArm(); raiseLift(); }
+        }
+        if (stopbutton()){
+          delay(100);
+          if (stopbutton()){ raiseArm(); lowerLift(); }
+        }
       }
     } break;
     
@@ -187,8 +194,9 @@ void tankStage() {
 
 void lineStage() { 
   
-  locateZipline(leftCourse); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
+  locateZipline(true); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
   backUp(); /* REALIGNS */
+  raiseArm(); /* GET ARM OUT OF THE WAY */
   raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
   driveForward(); /* DRIVES THE BASKET ONTO THE ZIPLINE */
   lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */

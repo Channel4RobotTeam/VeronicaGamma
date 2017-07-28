@@ -66,13 +66,9 @@ void raiseLift(){
   
   /* RAISE THE LIFT */
   while (millis() - start > 10000) { /* TODO find proper duration */
-    if (pos != 60){
+    while (pos != 0){
       RCServo2.write(pos);
       pos = pos - 1;
-      delay(100);
-    } else {
-      RCServo2.write(90);
-      pos = 90;
     }
   }
   
@@ -89,14 +85,10 @@ void lowerLift(){
 
   /* LOWER THE LIFT */
   while (millis() - start > 8000){ /* TODO find proper duration */
-    if (pos != 100){
-      RCServo2.write(pos);
-      pos = pos + 1;
-      delay(100);
-    } else {
-      RCServo2.write(90);
-      pos = 90;
-    }
+   while (pos != 180){
+    RCServo2.write(pos);
+    pos = pos + 1;
+   }
   }
   
 }
