@@ -99,10 +99,10 @@ void rightTurn(Menu* menu) {
     motor.speed(LEFT_MOTOR, VELOCITY-50);
     motor.speed(RIGHT_MOTOR, -75);
 
-    if(count > 300 && (leftQRD > menu->thresh_left || rightQRD > menu->thresh_right)) {
+    if(count > 1000 && (leftQRD > menu->thresh_left || rightQRD > menu->thresh_right)) {
       motor.speed(LEFT_MOTOR, 0);
       motor.speed(RIGHT_MOTOR, 0);
-      delay(1000);
+      delay(2000);
       break;
     }
   }

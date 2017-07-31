@@ -50,8 +50,6 @@ bool reachedTankVar = false;
  */
 void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
 
-  int turnValue = 0;
-  int lastTurnValue = 0;
   currCount = 0;
   displayCount = 0;
   bool topOfRamp = false;
@@ -95,15 +93,6 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
     derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd;
     int correction = proportional + integral + derivative;
 
-    /* DETERMINE WHETHER TURNING */
-    if (posErrCount > 100 ){
-      turnValue = -1; /* LEFT TURN */
-    } else if (negErrCount > 100){
-      turnValue = +1; /* RIGHT TURN */
-    } else if (noErrCount > 100) {
-      turnValue = 0 ;
-    }
-
     /* CORRECTION APPLICATION */
     correctionApplication(menu, correction);
     
@@ -142,82 +131,22 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
         displayCount = 0; /* RESET */
       }
 
-      if (leftCourse) { 
-        if (lastTurnValue == +1 && turnValue == 0){
-          turnCount = turnCount + 1;
-        } 
-      } else {
-        if (lastTurnValue = -1 && turnValue == 0){
-          turnCount = turnCount + 1;
-        }
-      }
-      
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
-//        if(topOfRamp && sideRightQRD > THRESH_SIDE_RIGHT) {
-//          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//          LCD.clear(); LCD.home();
-//          LCD.print("TANK");
-//          LCD.setCursor(0, 1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
-//          delay(3000);
-//          rightTurn(menu);
-//          break;
-//        }
-//      if (leftCourse && topOfRamp){
-////        if (turnValue = +1){ /* RIGHT TURN INTO TANK */
-////          if (turnCount < 3){
-////            turnCount = turnCount + 1;
-////          } else {
-////            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-////            LCD.clear(); LCD.home();
-////            LCD.print("RIGHT TURN");
-////            delay(2000);
-////            rightTurn(menu);
-////            break;
-////          }
-//        if (turnCount >= 2){
-//          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//          LCD.clear(); LCD.home();
-//          LCD.print("RIGHT TURN");
-//          delay(2000);
-//          rightTurn(menu);
-//          break;
-//        }
-//      } else if (!leftCourse && topOfRamp) { /* RIGHT COURSE */
-//        if (turnValue = -1){ /* LEFT TURN INTO TANK */
-////          if (turnCount < 3){
-////            turnCount = turnCount + 1;
-////          } else {
-////            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-////            LCD.clear(); LCD.home();
-////            LCD.print("LEFT TURN");
-////            delay(2000);
-////            break;
-////          }
-//          if (turnCount >= 2){
-//            motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//            LCD.clear(); LCD.home();
-//            LCD.print("LEFT TURN");
-//            delay(2000);
-//            break;
-//          }
-//        }
-//      }
-//      
+      if(topOfRamp && sideRightQRD > menu->thresh_sideRight) {
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+        LCD.clear(); LCD.home();
+        LCD.print("TANK");
+        LCD.setCursor(0, 1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
+        delay(4000);
+        rightTurn(menu);
+        break;
+      }
     }
     
     /* PRINTS INPUTS AND OUTPUTS */
     if(displayCount == 30 && !topOfRamp) {
       /* FOR DEBUGGING THE QRDs */
       printQRDs();
-      /* FOR DEBUGGING RECOGNIZING TURNS */
-//      LCD.clear(); LCD.home();
-//      if (negErrCount > 100){
-//        LCD.print("Right turn!");
-//      } else if (posErrCount > 100) {
-//        LCD.print("Left turn!");
-//      } else if (noErrCount > 100) {
-//        LCD.print("STRAIGHT ;)");
-//      }
       /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
 //      LCD.clear(); LCD.home();
 //      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
@@ -226,7 +155,6 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       displayCount = 0; /* RESET */
     }
 
-    lastTurnValue = turnValue;
     lastErr = currErr;
     lastCount = currCount;
   }
@@ -403,7 +331,7 @@ void printQRDs() {
   LCD.clear(); LCD.home();
   LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(", R: "); LCD.print(analogRead(RIGHT_QRD));
   LCD.setCursor(0,1);
-  LCD.print("SR:"); LCD.print(analogRead(SIDE_RIGHT_QRD)); LCD.print(",S: "); LCD.print(analogRead(SIDE_QRD)); LCD.print(" "); LCD.print(digitalRead(RAMP_SWITCH));
+  LCD.print("SR:"); LCD.print(analogRead(SIDE_RIGHT_QRD)); LCD.print(", S: "); LCD.print(analogRead(SIDE_QRD)); LCD.print(" "); LCD.print(digitalRead(RAMP_SWITCH));
 }
 
 void printFreq() {
