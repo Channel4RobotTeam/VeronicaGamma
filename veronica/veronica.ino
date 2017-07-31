@@ -87,7 +87,9 @@ void loop() {
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
-      raiseArm(); raiseLift();
+      rightTurn(menu);
+      driveForward(150.0);
+      statRightTurn(menu);
     } break;
     
   }
@@ -114,7 +116,7 @@ void getUserInput() {
       case 5: { LCD.print("RAMP STAGE"); } break;
       case 6: { LCD.print("TANK STAGE"); } break;
       case 7: { LCD.print("LINE STAGE"); } break;
-      case 8: { LCD.print("LIFT TEST"); } break;
+      case 8: { LCD.print("MISC TEST"); } break;
     }
     if (startbutton()) {
       delay(100); if (startbutton()) { break; }
@@ -169,41 +171,43 @@ void tankStage() {
     }
 
     /* TODO clean this up */
-    bool skipTick = false;
-    if (tickCount = 1 && millis() - start > 63500){
-      skipTick = true;
-    } else if (tickCount = 2 && millis() - start > 68500){
-      skipTick = true;
-    } else if (tickCount = 3 && millis() - start > 73500){
-      skipTick = true;
-    } else if (tickCount = 4 && millis() - start > 78500){
-      skipTick = true;
-    } else if (tickCount = 5 && millis() - start > 83500){
-      skipTick = true;
-    } else if (tickCount = 6 && millis() - start > 98500){
-      skipTick = true;
-    }
+//    bool skipTick = false;
+//    if (tickCount = 1 && millis() - start > 63500){
+//      skipTick = true;
+//    } else if (tickCount = 2 && millis() - start > 68500){
+//      skipTick = true;
+//    } else if (tickCount = 3 && millis() - start > 73500){
+//      skipTick = true;
+//    } else if (tickCount = 4 && millis() - start > 78500){
+//      skipTick = true;
+//    } else if (tickCount = 5 && millis() - start > 83500){
+//      skipTick = true;
+//    } else if (tickCount = 6 && millis() - start > 98500){
+//      skipTick = true;
+//    }
 
     /* GO TO NEXT TICK */
     aroundTank(menu); 
+    delay(1000);
 
-    if (!skipTick){
-    /* PICK UP AGENT */
-      delay(2000);
-      raiseArm();
-      delay(500);
-      closePincer();
-      delay(1500);
-      lowerArm();
-      delay(1000);
-      openPincer();
-    }
+//    if (!skipTick){
+//    /* PICK UP AGENT */
+//      delay(2000);
+//      raiseArm();
+//      delay(500);
+//      closePincer();
+//      delay(1500);
+//      lowerArm();
+//      delay(1000);
+//      openPincer();
+//    }
     
   }
   
 }
 
 void lineStage() { 
+  unsigned long duration = 1000.0;
   
   locateZipline(true); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
   backUp(); /* REALIGN */
@@ -211,7 +215,7 @@ void lineStage() {
   delay(1000);
 //  raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
 //  delay(2000);
-  driveForward(); /* DRIVES THE BASKET ONTO THE ZIPLINE */
+  driveForward(duration); /* DRIVES THE BASKET ONTO THE ZIPLINE */
 //  lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
   
 }

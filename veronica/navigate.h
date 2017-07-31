@@ -13,6 +13,8 @@
 void locateZipline(bool leftCourse);
 void rightTurn(Menu* menu);
 void backUp();
+void driveForward(unsigned long duration);
+void statRightTurn(Menu* menu);
 
 
 
@@ -96,8 +98,8 @@ void rightTurn(Menu* menu) {
       displayCount = 0;
     }
     
-    motor.speed(LEFT_MOTOR, VELOCITY-50);
-    motor.speed(RIGHT_MOTOR, -75);
+    motor.speed(LEFT_MOTOR, VELOCITY-70);
+    motor.speed(RIGHT_MOTOR, 25);
 
     if(count > 1000 && (leftQRD > menu->thresh_left || rightQRD > menu->thresh_right)) {
       motor.speed(LEFT_MOTOR, 0);
@@ -141,12 +143,12 @@ void backUp() {
  *  Drives forward for 1000 loops
  *  
  */
-void driveForward() {
+void driveForward(unsigned long duration) {
 
   int count = 0;
   unsigned long start = millis();
 
-  while(millis() - start < 1000) {
+  while(millis() - start < duration) {
     count = count + 1;
     motor.speed(LEFT_MOTOR, VELOCITY - 25);
     motor.speed(RIGHT_MOTOR, VELOCITY - 25);
@@ -156,6 +158,42 @@ void driveForward() {
   motor.speed(LEFT_MOTOR, 0);
   motor.speed(RIGHT_MOTOR, 0);
   delay(2000);
+  
+}
+
+void statRightTurn(Menu* menu) {
+
+  int displayCount = 0;
+  int count = 0;
+  
+  while(true) {
+    count = count + 1;
+    
+    /* Press YELLOW RESET to switch to user input menu */
+    int switch0 = digitalRead(0);
+    if (switch0 == 0) { 
+      delay(1000); 
+      if (switch0 == 0) { break; } 
+    }
+    
+    displayCount = displayCount + 1;
+    if(displayCount == 30) {
+      LCD.clear(); LCD.home();
+      LCD.print(" stat RIGHT TURN");
+      displayCount = 0;
+    }
+    
+    motor.speed(LEFT_MOTOR, 50);
+    motor.speed(RIGHT_MOTOR, -50);
+    delay(1);
+
+    if(count > 1000) {
+      motor.speed(LEFT_MOTOR, 0);
+      motor.speed(RIGHT_MOTOR, 0);
+      delay(2000);
+      break;
+    }
+  }
   
 }
 

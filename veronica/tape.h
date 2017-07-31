@@ -178,19 +178,35 @@ void aroundTank(Menu* menu) {
   while (true) {
 
   /* DRIVE STRAIGHT IF TOUCHING TANK */
-  if (digitalRead(TANK_SWITCH)){
-    motor.speed(LEFT_MOTOR, menu->velocity);
-    motor.speed(RIGHT_MOTOR, menu->velocity);
+  if (digitalRead(TANK_SWITCH) == 0){
+    motor.speed(LEFT_MOTOR, menu->velocity - 20);
+    motor.speed(RIGHT_MOTOR, menu->velocity + 20);
   } else {
-    motor.speed(LEFT_MOTOR, menu->velocity - 15);
-    motor.speed(RIGHT_MOTOR, menu->velocity + 30);
+    motor.speed(LEFT_MOTOR, menu->velocity - 40);
+    motor.speed(RIGHT_MOTOR, menu->velocity + 60);
   }
   /* BREAK IF SIDE QRD SENSES TAPE */
+  sideQRD = analogRead(SIDE_QRD);
   if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 1000) {
     motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
     lastTickCount = currCount;
     break;
   }
+  /* Press YELLOW RESET to switch to user input menu */
+  switch0 = digitalRead(YELLOWBUTTON);
+  if (switch0 == 0) { 
+    delay(1000); 
+    if (switch0 == 0) { break; } 
+  }
+  if (displayCount == 30){
+    LCD.clear(); LCD.home();
+    LCD.print("S: "); LCD.print(analogRead(SIDE_QRD));
+    LCD.setCursor(0,1);
+    LCD.print("Thresh: "); LCD.print(menu->thresh_side);
+    displayCount = 0;
+  }
+  displayCount = displayCount + 1;
+  currCount = currCount + 1;
     
 //    currCount = currCount + 1; 
 //    displayCount = displayCount + 1;
@@ -199,7 +215,6 @@ void aroundTank(Menu* menu) {
 //    leftQRD = analogRead(LEFT_QRD);
 //    rightQRD = analogRead(RIGHT_QRD);
 //    sideQRD = analogRead(SIDE_QRD);
-//    sideRightQRD = analogRead(SIDE_RIGHT_QRD);
 //
 //    /* Press YELLOW RESET to switch to user input menu */
 //    switch0 = digitalRead(YELLOWBUTTON);
