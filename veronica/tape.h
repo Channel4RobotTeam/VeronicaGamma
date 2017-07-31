@@ -153,15 +153,15 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
       }
       
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
-        if(topOfRamp && sideRightQRD > THRESH_SIDE_RIGHT) {
-          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-          LCD.clear(); LCD.home();
-          LCD.print("TANK");
-          LCD.setCursor(0, 1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
-          delay(3000);
-          rightTurn(menu);
-          break;
-        }
+//        if(topOfRamp && sideRightQRD > THRESH_SIDE_RIGHT) {
+//          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//          LCD.clear(); LCD.home();
+//          LCD.print("TANK");
+//          LCD.setCursor(0, 1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
+//          delay(3000);
+//          rightTurn(menu);
+//          break;
+//        }
 //      if (leftCourse && topOfRamp){
 ////        if (turnValue = +1){ /* RIGHT TURN INTO TANK */
 ////          if (turnCount < 3){

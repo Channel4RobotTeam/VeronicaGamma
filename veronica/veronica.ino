@@ -24,6 +24,7 @@
 int command = 0;
 bool leftCourse = true;
 Menu* menu = new Menu();
+unsigned long start;
 
 void setup() {
   #include <phys253setup.txt>
@@ -39,6 +40,8 @@ void loop() {
   switch (command) {
     
     case 0: { /* RUN FULL COURSE */
+
+      start = millis();
 
       gateStage();  /* GO FROM START TO START OF TANK */
       rampStage(leftCourse); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
@@ -84,16 +87,7 @@ void loop() {
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
-      while (true) {
-        if (startbutton()){
-          delay(100);
-          if (startbutton()){ raiseArm(); raiseLift(); }
-        }
-        if (stopbutton()){
-          delay(100);
-          if (stopbutton()){ raiseArm(); lowerLift(); }
-        }
-      }
+      raiseArm(); raiseLift();
     } break;
     
   }
@@ -120,7 +114,7 @@ void getUserInput() {
       case 5: { LCD.print("RAMP STAGE"); } break;
       case 6: { LCD.print("TANK STAGE"); } break;
       case 7: { LCD.print("LINE STAGE"); } break;
-      case 8: { LCD.print("MISC TEST"); } break;
+      case 8: { LCD.print("LIFT TEST"); } break;
     }
     if (startbutton()) {
       delay(100); if (startbutton()) { break; }
@@ -165,7 +159,7 @@ void rampStage(bool leftCourse) {
 
 void tankStage() {
   
-  for(int tickCount = 0; tickCount < 6; tickCount++) {
+  for(int tickCount = 1; tickCount <= 6; tickCount++) {
 
     /* Press YELLOW RESET to switch to user input menu */
     int switch0 = digitalRead(YELLOWBUTTON);
@@ -174,19 +168,36 @@ void tankStage() {
       if (switch0 == 0) { break; } 
     }
 
+    /* TODO clean this up */
+    bool skipTick = false;
+    if (tickCount = 1 && millis() - start > 63500){
+      skipTick = true;
+    } else if (tickCount = 2 && millis() - start > 68500){
+      skipTick = true;
+    } else if (tickCount = 3 && millis() - start > 73500){
+      skipTick = true;
+    } else if (tickCount = 4 && millis() - start > 78500){
+      skipTick = true;
+    } else if (tickCount = 5 && millis() - start > 83500){
+      skipTick = true;
+    } else if (tickCount = 6 && millis() - start > 98500){
+      skipTick = true;
+    }
+
     /* GO TO NEXT TICK */
     aroundTank(menu); 
-    
+
+    if (!skipTick){
     /* PICK UP AGENT */
-    delay(2000);
-    raiseArm();
-    delay(500);
-    closePincer();
-    delay(1500);
-    lowerArm();
-    delay(1000);
-    openPincer();
-//    shake();  // might be unnecessary
+      delay(2000);
+      raiseArm();
+      delay(500);
+      closePincer();
+      delay(1500);
+      lowerArm();
+      delay(1000);
+      openPincer();
+    }
     
   }
   
@@ -195,11 +206,13 @@ void tankStage() {
 void lineStage() { 
   
   locateZipline(true); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
-  backUp(); /* REALIGNS */
-  raiseArm(); /* GET ARM OUT OF THE WAY */
-  raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
+  backUp(); /* REALIGN */
+//  raiseArm(); /* GET ARM OUT OF THE WAY */
+  delay(1000);
+//  raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
+//  delay(2000);
   driveForward(); /* DRIVES THE BASKET ONTO THE ZIPLINE */
-  lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
+//  lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
   
 }
 
