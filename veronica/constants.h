@@ -16,6 +16,7 @@
 /* DIGITAL INPUTS */
 #define YELLOWBUTTON 0
 #define RAMP_SWITCH 2
+#define TANK_SWITCH 4
 
 /* MOTOR OUTPUTS */
 #define RIGHT_MOTOR 0
