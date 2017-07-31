@@ -176,85 +176,51 @@ void aroundTank(Menu* menu) {
   int maxIntegral = 60;
   
   while (true) {
+    /* INPUTS */
+    leftQRD = analogRead(LEFT_QRD);
+    rightQRD = analogRead(RIGHT_QRD);
+    sideQRD = analogRead(SIDE_QRD);
+    sideRightQRD = analogRead(SIDE_RIGHT_QRD);
 
-  /* DRIVE STRAIGHT IF TOUCHING TANK */
-  if (digitalRead(TANK_SWITCH) == 0){
-    motor.speed(LEFT_MOTOR, menu->velocity - 20);
-    motor.speed(RIGHT_MOTOR, menu->velocity + 20);
-  } else {
-    motor.speed(LEFT_MOTOR, menu->velocity - 40);
-    motor.speed(RIGHT_MOTOR, menu->velocity + 60);
-  }
-  /* BREAK IF SIDE QRD SENSES TAPE */
-  sideQRD = analogRead(SIDE_QRD);
-  if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 1000) {
-    motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-    lastTickCount = currCount;
-    break;
-  }
-  /* Press YELLOW RESET to switch to user input menu */
-  switch0 = digitalRead(YELLOWBUTTON);
-  if (switch0 == 0) { 
-    delay(1000); 
-    if (switch0 == 0) { break; } 
-  }
-  if (displayCount == 30){
-    LCD.clear(); LCD.home();
-    LCD.print("S: "); LCD.print(analogRead(SIDE_QRD));
-    LCD.setCursor(0,1);
-    LCD.print("Thresh: "); LCD.print(menu->thresh_side);
-    displayCount = 0;
-  }
-  displayCount = displayCount + 1;
-  currCount = currCount + 1;
-    
-//    currCount = currCount + 1; 
-//    displayCount = displayCount + 1;
-//
-//    /* INPUTS */
-//    leftQRD = analogRead(LEFT_QRD);
-//    rightQRD = analogRead(RIGHT_QRD);
-//    sideQRD = analogRead(SIDE_QRD);
-//
-//    /* Press YELLOW RESET to switch to user input menu */
-//    switch0 = digitalRead(YELLOWBUTTON);
-//    if (switch0 == 0) { 
-//      delay(1000); 
-//      if (switch0 == 0) { break; } 
+    /* Press YELLOW RESET to switch to user input menu */
+    switch0 = digitalRead(YELLOWBUTTON);
+    if (switch0 == 0) { 
+      delay(1000); 
+      if (switch0 == 0) { break; } 
+    }
+
+    /* ERROR */
+    int currErr = tankError(menu, rightQRD, leftQRD, lastErr);
+
+    /* CORRECTION CALCULATION */
+    proportional = currErr * menu->kp_circle;
+//    integral = currErr * (currCount - lastCount) * menu->ki + integral;
+//    if (integral > maxIntegral) {
+//      integral = maxIntegral;
+//    } else if (integral < 0){
+//      integral = 0;
 //    }
-//
-//    /* ERROR */
-//    int currErr = tankError(menu, rightQRD, leftQRD, lastErr);
-//
-//    /* CORRECTION CALCULATION */
-//    proportional = currErr * menu->kp_circle;
-////    integral = currErr * (currCount - lastCount) * menu->ki + integral;
-////    if (integral > maxIntegral) {
-////      integral = maxIntegral;
-////    } else if (integral < 0){
-////      integral = 0;
-////    }
-//    derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd_circle;
-//    int correction = proportional + integral + derivative;
-//
-//    /* CORRECTION APPLICATION */
-//    correctionApplication(menu, correction);
-//
-//    /* PRINTS INPUTS AND OUTPUTS */
-//    if(displayCount == 30) {
-//      printQRDs();
-//      displayCount = 0; /* RESET */
-//    }
-//
-//    /* When side QRD senses tape */
-//    if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 1000) {
-//      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-//      lastTickCount = currCount;
-//      break;
-//    }
-//
-//    lastErr = currErr;
-//    lastCount = currCount;
+    derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd_circle;
+    int correction = proportional + integral + derivative;
+
+    /* CORRECTION APPLICATION */
+    correctionApplication(menu, correction);
+
+    /* PRINTS INPUTS AND OUTPUTS */
+    if(displayCount == 30) {
+      printQRDs();
+      displayCount = 0; /* RESET */
+    }
+
+    /* When side QRD senses tape */
+    if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 1000) {
+      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+      lastTickCount = currCount;
+      break;
+    }
+
+    lastErr = currErr;
+    lastCount = currCount;
   }
 }
 
