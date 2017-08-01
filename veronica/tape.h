@@ -175,7 +175,7 @@ void aroundTank(Menu* menu) {
   int derivative = 0;
   int maxIntegral = 60;
   
-  while (true) {
+  while (true) {    
     /* INPUTS */
     leftQRD = analogRead(LEFT_QRD);
     rightQRD = analogRead(RIGHT_QRD);
@@ -234,14 +234,17 @@ void circleFollow(Menu* menu){
   /* INITIALIZE VARIABLES */
   currCount = 0;
   displayCount = 0;
-  int leftThresh = menu->thresh_left;
-  int rightThresh = menu->thresh_right;
-  int sideThresh = menu->thresh_side;
+  int error = -1;
   int lastError = 0;
   int lastCount = 0;
+  int sawLastTick = 0;
 
   /* MAIN LOOP */
   while (true) {
+
+    /* INCREMENT COUNTERS */
+    currCount = currCount + 1;
+    displayCount = displayCount + 1;
 
     /* BREAK IF YELLOW BUTTON PUSHED */
     switch0 = digitalRead(YELLOWBUTTON);
@@ -256,50 +259,76 @@ void circleFollow(Menu* menu){
     sideQRD = analogRead(SIDE_QRD);
   
     /* DETERMINE ERROR */
-    int error = 0;
-    if (leftQRD > leftThresh && rightQRD < rightThresh){ /* SLIGHTLY RIGHT ***ZERO ERROR*** */
-      error = 0;
-    } else if (leftQRD > leftThresh && rightQRD > rightThresh){ /* ON TAPE */
-      error = -1;
-    } else if (leftQRD < leftThresh && rightQRD > rightThresh){ /* SLIGHTLY LEFT */
-      error = -2;
-    } else if (leftQRD < leftThresh && rightQRD < rightThresh){ /* OFF TAPE */
-      if (lastError < 1){ /* LAST LEFT */
-        error = -3;
-      } else if (lastError > 1) { /* LAST RIGHT */
-        error = +1;
-      } else { /* BOTH QRDS WENT OFF AT SAME TIME */
-        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-        LCD.clear(); LCD.home();
-        LCD.print("LOST TAPE");
-        delay(3000);
-        break;
+    int thresh = 200;
+    if (leftQRD < thresh && rightQRD > thresh){ /* SLIGHTLY LEFT */
+      error = -2;  
+    } else if (leftQRD > thresh && rightQRD > thresh){ /* ON TAPE */
+      error = +1;
+    } else if (leftQRD < thresh && rightQRD < thresh){ /* OFF TAPE */
+      if (lastError < 0){ /* LAST LEFT */
+        error = 0;
+      } else if (lastError == 0) { /* LAST RIGHT */
+        error = +2;
       }
+    } else { /* MUST BE SLIGHTLY RIGHT */
+      error = 0;
     }
   
     /* DETERMINE CORRECTION */
-    int proportional = error * menu->kp;
-    int derivative = ((error - lastError) / (currCount - lastCount)) * menu->kd;
+    int kp = 20;
+    int kd = 35;
+    int proportional = error * kp;
+    int derivative = ((error - lastError) / (currCount - lastCount)) * kd;
     int corr = proportional + derivative;
   
     /* APPLY CORRECTION */
-    int defaultLeft = menu->velocity - 30;
-    int defaultRight = menu->velocity + 30;
-    if (error = 0){
-      motor.speed(LEFT_MOTOR, defaultLeft);
-      motor.speed(RIGHT_MOTOR, defaultRight);
-    } else if (error < 0){
-      motor.speed(LEFT_MOTOR, defaultLeft + abs(corr));
-      motor.speed(RIGHT_MOTOR, defaultRight - abs(corr));
-    } else { /* error > 0 */
-      motor.speed(LEFT_MOTOR, defaultLeft - abs(corr));
-      motor.speed(RIGHT_MOTOR, defaultRight + abs(corr));
+    int motorSpeed = 100;
+    if (abs(corr) > motorSpeed){
+      if (corr < 0){
+        motor.speed(LEFT_MOTOR, motorSpeed - corr + 11);
+        motor.speed(RIGHT_MOTOR, 0);
+      } else {
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, motorSpeed + corr);
+      }
+    } else {
+      motor.speed(LEFT_MOTOR, motorSpeed - corr + 11);
+      motor.speed(RIGHT_MOTOR, motorSpeed + corr);
+    }
+
+    /* STOP AT TICKS */
+    if (sideQRD > 150 && currCount - sawLastTick > 2000){
+      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+      LCD.clear(); LCD.home();
+      LCD.print("AT TICK MARK");
+      delay(2000);
+
+      /* LINE UP WITH TOY FOR ARM */
+      LCD.setCursor(0,1);
+      LCD.print("CORRECTING");
+      leftQRD = analogRead(LEFT_QRD);
+      rightQRD = analogRead(RIGHT_QRD);
+      unsigned long startCorr = millis();
+      while (!(leftQRD > thresh && rightQRD < thresh)){
+        leftQRD = analogRead(LEFT_QRD);
+        rightQRD = analogRead(RIGHT_QRD);
+//        motor.speed(LEFT_MOTOR, motorSpeed - 45);
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, motorSpeed + 45);
+        currCount = currCount + 1;
+      }
+      backUp(350.0);
+      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0); /* PAUSE -- ARM MOVEMENTS WOULD GO HERE */
+      delay(2000);
+        
+      sawLastTick = currCount;  
+      
     }
     
     /* PRINT VALUES */
     if (displayCount == 30){
       LCD.clear(); LCD.home();
-      LCD.print("CIRCLE FOLLOW");
+      LCD.print("Err: "); LCD.print(error);
       LCD.setCursor(0,1);
       LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
       displayCount = 0;
@@ -308,10 +337,6 @@ void circleFollow(Menu* menu){
     /* UPDATE LAST VALUES */
     lastError = error;
     lastCount = currCount;
-  
-    /* INCREMENT COUNTERS */
-    currCount = currCount + 1;
-    displayCount = displayCount + 1;
             
   }
   
