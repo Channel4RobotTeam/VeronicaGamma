@@ -210,7 +210,8 @@ void lineStage() {
   unsigned long duration = 1000.0;
   
   locateZipline(true); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
-  backUp(); /* REALIGN */
+  delay(1000);
+  backUp(duration); /* REALIGN */
 //  raiseArm(); /* GET ARM OUT OF THE WAY */
   delay(1000);
 //  raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */

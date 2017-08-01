@@ -75,6 +75,7 @@ void rightTurn(Menu* menu) {
   
   int displayCount = 0;
   int count = 0;
+  int tapeCount = 0;
   
   while(true) {
     count = count + 1;
@@ -102,10 +103,14 @@ void rightTurn(Menu* menu) {
     motor.speed(RIGHT_MOTOR, 25);
 
     if(count > 1000 && (leftQRD > menu->thresh_left || rightQRD > menu->thresh_right)) {
-      motor.speed(LEFT_MOTOR, 0);
-      motor.speed(RIGHT_MOTOR, 0);
-      delay(2000);
-      break;
+      count = 0;
+      tapeCount = tapeCount + 1;
+      if(tapeCount > 1) {
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, 0);
+        delay(2000);
+        break;
+      }
     }
   }
   
@@ -115,17 +120,14 @@ void rightTurn(Menu* menu) {
 
 /* 
  *  
- *  Backs up for 1000 loops 
+ * Drives in reverse for a set duration determined by the function's parameter
  *  
  */ 
-//TODO: check how far this number of loops corresponds to
-void backUp() {
+void backUp(unsigned long duration) {
   
-  int count = 0;
   unsigned long start = millis();
 
-  while(millis() - start < 1000) {
-    count = count + 1;
+  while(millis() - start < duration) {
     motor.speed(LEFT_MOTOR, -75);
     motor.speed(RIGHT_MOTOR, -75);
     delay(100);
@@ -133,23 +135,20 @@ void backUp() {
 
   motor.speed(LEFT_MOTOR, 0);
   motor.speed(RIGHT_MOTOR, 0);
-  delay(2000);
   
 }
 
 
 /* 
  *  
- *  Drives forward for 1000 loops
+ *  Drives forward for a set duration determined by the function's parameter
  *  
  */
 void driveForward(unsigned long duration) {
-
-  int count = 0;
+  
   unsigned long start = millis();
 
   while(millis() - start < duration) {
-    count = count + 1;
     motor.speed(LEFT_MOTOR, VELOCITY - 25);
     motor.speed(RIGHT_MOTOR, VELOCITY - 25);
     delay(100);
