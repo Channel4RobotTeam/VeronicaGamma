@@ -47,6 +47,8 @@ void loop() {
       rampStage(leftCourse); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
       if(!leftCourse) {
         driveForward(500.0);
+      } else {
+        //backUp(200.0);
       }
       rightTurnToTape(menu);
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
@@ -96,9 +98,9 @@ void loop() {
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
-      rampStage(leftCourse);
+      rampStage(false);
       delay(1000);
-      driveForward(500.0);
+      driveForward(600.0);
       delay(1000);
       rightTurnToTape(menu);
       delay(1000);
@@ -222,7 +224,7 @@ void tankStage() {
 void lineStage() { 
   unsigned long duration = 1000.0;
   
-  locateZipline(true); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
+  locateZipline(); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
   delay(1000);
   backUp(duration); /* REALIGN */
 //  raiseArm(); /* GET ARM OUT OF THE WAY */
@@ -231,6 +233,7 @@ void lineStage() {
 //  delay(2000);
   driveForward(duration); /* DRIVES THE BASKET ONTO THE ZIPLINE */
 //  lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
+  //backUp(duration); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
   
 }
 

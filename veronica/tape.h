@@ -138,7 +138,6 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
         LCD.print("TANK");
         LCD.setCursor(0, 1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
         delay(4000);
-        rightTurn(menu);
         break;
       }
     }

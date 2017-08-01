@@ -10,7 +10,7 @@
 #include "menu.h"
 
 /* FUNCTION DECLARATIONS */
-void locateZipline(bool leftCourse);
+void locateZipline();
 void rightTurnToTape(Menu* menu);
 void backUp();
 void driveForward(unsigned long duration);
@@ -23,8 +23,9 @@ void rightTurn(Menu* menu, unsigned long duration);
  *  Drives straight forward until senses 10kHz signal and then stops 
  *  
  */
-void locateZipline(bool leftCourse) {
-  
+void locateZipline() {
+
+  LCD.clear(); LCD.home();
   int displayCount = 0;
   
   while(true) {
@@ -40,7 +41,7 @@ void locateZipline(bool leftCourse) {
   
     displayCount = displayCount + 1;
     if(displayCount == 30) {
-      LCD.clear(); LCD.home();
+      LCD.home();
       LCD.print("FINDING ZIPLINE");
       LCD.setCursor(0,1); LCD.print("10kHz: "); LCD.print(analogRead(TENKHZ));
       displayCount = 0;
@@ -96,11 +97,10 @@ void rightTurnToTape(Menu* menu) {
     motor.speed(LEFT_MOTOR, VELOCITY-70);
     motor.speed(RIGHT_MOTOR, 25);
 
-    if(count > 50 && (leftQRD > menu->thresh_left || rightQRD > menu->thresh_right)) {
+    if(count > 50 && (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right)) {
       count = 0;
       motor.speed(LEFT_MOTOR, 0);
       motor.speed(RIGHT_MOTOR, 0);
-      delay(2000);
       break;
     }
   }

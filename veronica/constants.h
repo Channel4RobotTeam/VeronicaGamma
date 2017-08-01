@@ -35,9 +35,9 @@
 
 /* DEFAULTS MENU VALUES */
 #define VELOCITY 150
-#define KP 45
+#define KP 48
 #define KI 5
-#define KD 76
+#define KD 78
 #define KP_CIRCLE 40
 #define KI_CIRCLE 0
 #define KD_CIRCLE 75
@@ -47,4 +47,4 @@
 #define THRESH_FRONT 900
 #define THRESH_ONEKHZ 900
 #define THRESH_TENKHZ 300
-#define THRESH_SIDE_RIGHT 650
+#define THRESH_SIDE_RIGHT 850
