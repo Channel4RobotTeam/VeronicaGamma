@@ -41,8 +41,8 @@
 #define KP_CIRCLE 40
 #define KI_CIRCLE 0
 #define KD_CIRCLE 75
-#define THRESH_LEFT 300
-#define THRESH_RIGHT 300
+#define THRESH_LEFT 200
+#define THRESH_RIGHT 200
 #define THRESH_SIDE 150
 #define THRESH_FRONT 900
 #define THRESH_ONEKHZ 900

@@ -102,8 +102,7 @@ void loop() {
       delay(1000);
       rightTurnToTape(menu);
       delay(1000);
-      aroundTank(menu);
-//      rightTurn(menu, 500.0);
+      circleFollow(menu);
     } break;
     
   }
