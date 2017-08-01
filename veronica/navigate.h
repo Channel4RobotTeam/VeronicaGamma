@@ -11,10 +11,10 @@
 
 /* FUNCTION DECLARATIONS */
 void locateZipline(bool leftCourse);
-void rightTurn(Menu* menu);
+void rightTurnToTape(Menu* menu);
 void backUp();
 void driveForward(unsigned long duration);
-void statRightTurn(Menu* menu);
+void rightTurn(Menu* menu, unsigned long duration);
 
 
 
@@ -25,7 +25,7 @@ void statRightTurn(Menu* menu);
  */
 void locateZipline(bool leftCourse) {
   
-  int count = 0;
+  int displayCount = 0;
   
   while(true) {
     /* Press YELLOW RESET to switch to user input menu */
@@ -38,27 +38,22 @@ void locateZipline(bool leftCourse) {
     /* INPUTS */
     int signal10kHz = analogRead(TENKHZ);
   
-    count = count + 1;
-    if(count == 30) {
+    displayCount = displayCount + 1;
+    if(displayCount == 30) {
       LCD.clear(); LCD.home();
       LCD.print("FINDING ZIPLINE");
       LCD.setCursor(0,1); LCD.print("10kHz: "); LCD.print(analogRead(TENKHZ));
-      count = 0;
+      displayCount = 0;
     }
 
-    /* IF ON LEFT COURSE */
-    if(leftCourse) {
-      motor.speed(LEFT_MOTOR, VELOCITY-50);
-      motor.speed(RIGHT_MOTOR, VELOCITY-50);
-  
-      if(signal10kHz > THRESH_TENKHZ) {
-        motor.speed(LEFT_MOTOR, 0);
-        motor.speed(RIGHT_MOTOR, 0);
-        delay(3000);
-        break;
-      }
-    } else { /* IF ON RIGHT COURSE */
-      // TODO: go to middle tick mark && drive on angle to zipline?
+    motor.speed(LEFT_MOTOR, VELOCITY-50);
+    motor.speed(RIGHT_MOTOR, VELOCITY-50);
+
+    if(signal10kHz > THRESH_TENKHZ) {
+      motor.speed(LEFT_MOTOR, 0);
+      motor.speed(RIGHT_MOTOR, 0);
+      delay(3000);
+      break;
     }
   }
   
@@ -71,11 +66,10 @@ void locateZipline(bool leftCourse) {
  *  Continues to turn right until robot sees tape 
  *  
  */
-void rightTurn(Menu* menu) {
+void rightTurnToTape(Menu* menu) {
   
   int displayCount = 0;
   int count = 0;
-  int tapeCount = 0;
   
   while(true) {
     count = count + 1;
@@ -102,15 +96,12 @@ void rightTurn(Menu* menu) {
     motor.speed(LEFT_MOTOR, VELOCITY-70);
     motor.speed(RIGHT_MOTOR, 25);
 
-    if(count > 1000 && (leftQRD > menu->thresh_left || rightQRD > menu->thresh_right)) {
+    if(count > 50 && (leftQRD > menu->thresh_left || rightQRD > menu->thresh_right)) {
       count = 0;
-      tapeCount = tapeCount + 1;
-      if(tapeCount > 1) {
-        motor.speed(LEFT_MOTOR, 0);
-        motor.speed(RIGHT_MOTOR, 0);
-        delay(2000);
-        break;
-      }
+      motor.speed(LEFT_MOTOR, 0);
+      motor.speed(RIGHT_MOTOR, 0);
+      delay(2000);
+      break;
     }
   }
   
@@ -130,7 +121,6 @@ void backUp(unsigned long duration) {
   while(millis() - start < duration) {
     motor.speed(LEFT_MOTOR, -75);
     motor.speed(RIGHT_MOTOR, -75);
-    delay(100);
   }
 
   motor.speed(LEFT_MOTOR, 0);
@@ -151,22 +141,19 @@ void driveForward(unsigned long duration) {
   while(millis() - start < duration) {
     motor.speed(LEFT_MOTOR, VELOCITY - 25);
     motor.speed(RIGHT_MOTOR, VELOCITY - 25);
-    delay(100);
   }
 
   motor.speed(LEFT_MOTOR, 0);
   motor.speed(RIGHT_MOTOR, 0);
-  delay(2000);
   
 }
 
-void statRightTurn(Menu* menu) {
+void rightTurn(Menu* menu, unsigned long duration) {
 
+  unsigned long start = millis();
   int displayCount = 0;
-  int count = 0;
   
-  while(true) {
-    count = count + 1;
+  while(millis() - start < duration) {
     
     /* Press YELLOW RESET to switch to user input menu */
     int switch0 = digitalRead(0);
@@ -182,17 +169,13 @@ void statRightTurn(Menu* menu) {
       displayCount = 0;
     }
     
-    motor.speed(LEFT_MOTOR, 50);
-    motor.speed(RIGHT_MOTOR, -50);
-    delay(1);
-
-    if(count > 1000) {
-      motor.speed(LEFT_MOTOR, 0);
-      motor.speed(RIGHT_MOTOR, 0);
-      delay(2000);
-      break;
-    }
+    motor.speed(LEFT_MOTOR, 70);
+    motor.speed(RIGHT_MOTOR, -70);
   }
+  
+  motor.speed(LEFT_MOTOR, 0);
+  motor.speed(RIGHT_MOTOR, 0);
+  delay(2000);
   
 }
 

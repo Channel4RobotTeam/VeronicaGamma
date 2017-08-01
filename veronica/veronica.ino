@@ -45,11 +45,20 @@ void loop() {
 
       gateStage();  /* GO FROM START TO START OF TANK */
       rampStage(leftCourse); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
+      if(!leftCourse) {
+        driveForward(500.0);
+      }
+      rightTurnToTape(menu);
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
-      int countTo = 2; 
-      /* NAVIGATE TO FIRST TICK MARK */
+      int countTo = 0;
+      if(leftCourse) { countTo = 2; }
+      else { countTo = 4; }
+      /* NAVIGATE TO SECOND OR FOURTH TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
         aroundTank(menu); 
+      }
+      if(!leftCourse) {
+        rightTurn(menu, 500.0);
       }
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
       
@@ -87,9 +96,14 @@ void loop() {
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
-      rightTurn(menu);
-      driveForward(150.0);
-      statRightTurn(menu);
+      rampStage(leftCourse);
+      delay(1000);
+      driveForward(500.0);
+      delay(1000);
+      rightTurnToTape(menu);
+      delay(1000);
+      aroundTank(menu);
+//      rightTurn(menu, 500.0);
     } break;
     
   }
