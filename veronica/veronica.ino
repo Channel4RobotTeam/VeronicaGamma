@@ -87,9 +87,7 @@ void loop() {
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
-      rightTurn(menu);
-      driveForward(150.0);
-      statRightTurn(menu);
+      circleFollow(menu);
     } break;
     
   }

@@ -226,6 +226,99 @@ void aroundTank(Menu* menu) {
 
 /*
  * 
+ * FOLLOW THE OUTSIDE OF THE CIRCLE
+ * 
+ */
+void circleFollow(Menu* menu){
+
+  /* INITIALIZE VARIABLES */
+  currCount = 0;
+  displayCount = 0;
+  int leftThresh = menu->thresh_left;
+  int rightThresh = menu->thresh_right;
+  int sideThresh = menu->thresh_side;
+  int lastError = 0;
+  int lastCount = 0;
+
+  /* MAIN LOOP */
+  while (true) {
+
+    /* BREAK IF YELLOW BUTTON PUSHED */
+    switch0 = digitalRead(YELLOWBUTTON);
+    if (switch0 == 0) { 
+      delay(1000); 
+      if (switch0 == 0) { break; } 
+    }
+  
+    /* READ INPUTS */
+    leftQRD = analogRead(LEFT_QRD);
+    rightQRD = analogRead(RIGHT_QRD);
+    sideQRD = analogRead(SIDE_QRD);
+  
+    /* DETERMINE ERROR */
+    int error = 0;
+    if (leftQRD > leftThresh && rightQRD < rightThresh){ /* SLIGHTLY RIGHT ***ZERO ERROR*** */
+      error = 0;
+    } else if (leftQRD > leftThresh && rightQRD > rightThresh){ /* ON TAPE */
+      error = -1;
+    } else if (leftQRD < leftThresh && rightQRD > rightThresh){ /* SLIGHTLY LEFT */
+      error = -2;
+    } else if (leftQRD < leftThresh && rightQRD < rightThresh){ /* OFF TAPE */
+      if (lastError < 1){ /* LAST LEFT */
+        error = -3;
+      } else if (lastError > 1) { /* LAST RIGHT */
+        error = +1;
+      } else { /* BOTH QRDS WENT OFF AT SAME TIME */
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+        LCD.clear(); LCD.home();
+        LCD.print("LOST TAPE");
+        delay(3000);
+        break;
+      }
+    }
+  
+    /* DETERMINE CORRECTION */
+    int proportional = error * menu->kp;
+    int derivative = ((error - lastError) / (currCount - lastCount)) * menu->kd;
+    int corr = proportional + derivative;
+  
+    /* APPLY CORRECTION */
+    int defaultLeft = menu->velocity - 30;
+    int defaultRight = menu->velocity + 30;
+    if (error = 0){
+      motor.speed(LEFT_MOTOR, defaultLeft);
+      motor.speed(RIGHT_MOTOR, defaultRight);
+    } else if (error < 0){
+      motor.speed(LEFT_MOTOR, defaultLeft + abs(corr));
+      motor.speed(RIGHT_MOTOR, defaultRight - abs(corr));
+    } else { /* error > 0 */
+      motor.speed(LEFT_MOTOR, defaultLeft - abs(corr));
+      motor.speed(RIGHT_MOTOR, defaultRight + abs(corr));
+    }
+    
+    /* PRINT VALUES */
+    if (displayCount == 30){
+      LCD.clear(); LCD.home();
+      LCD.print("CIRCLE FOLLOW");
+      LCD.setCursor(0,1);
+      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
+      displayCount = 0;
+    }
+  
+    /* UPDATE LAST VALUES */
+    lastError = error;
+    lastCount = currCount;
+  
+    /* INCREMENT COUNTERS */
+    currCount = currCount + 1;
+    displayCount = displayCount + 1;
+            
+  }
+  
+}
+
+/*
+ * 
  * MISC HELPER FUNCTIONS
  * 
  */
