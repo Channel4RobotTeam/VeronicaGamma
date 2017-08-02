@@ -21,11 +21,11 @@
 /* MOTOR OUTPUTS */
 #define RIGHT_MOTOR 0
 #define LEFT_MOTOR 1
+#define LIFT_MOTOR 2
 
 /* SERVO OUTPUTS */
 #define ARM_SERVO 0
 #define CLAW_SERVO 1
-#define BASKET_SERVO 2
 
 /* STAGES */
 #define GATE_STAGE 0

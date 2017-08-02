@@ -65,9 +65,14 @@ void raiseLift(){
   LCD.print("RAISING");
   
   /* RAISE THE LIFT */
-  while (millis() - start < 3500 || pos != 60) { /* TODO find proper duration */
-    RCServo2.write(pos);
-    pos = pos - 1;
+  while (millis() - start < 2500) { /* TODO find proper duration */
+    motor.speed(LIFT_MOTOR, 175);
+
+    //breaking out of loop after specified amount of time
+    if(millis()-start == 2500){
+      motor.speed(LIFT_MOTOR, 0);
+      break;
+    }
   }
   
 }
@@ -82,9 +87,14 @@ void lowerLift(){
   LCD.print("LOWERING");
 
   /* LOWER THE LIFT */
-  while (millis() - start < 3500 || pos != 120){ /* TODO find proper duration */
-    RCServo2.write(pos);
-    pos = pos + 1;
+  while (millis() - start < 1000){ /* TODO find proper duration */
+    motor.speed(LIFT_MOTOR, 5);
+
+    //breaking out of loop after specified amount of time
+    if(millis()-start == 1000){
+      motor.speed(LIFT_MOTOR, 0);
+      break;
+    }
   }
   
 }
