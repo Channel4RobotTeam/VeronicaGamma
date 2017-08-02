@@ -11,12 +11,11 @@
 
 /* FUNCTIONS DECLARATIONS */
 void tapeFollow(Menu* menu);
-void aroundTank(Menu* menu);
 void recoverLostTape(Menu* menu, int currentError, int lastError);
+void circleFollow(Menu* menu);
 
 /* HELPER FUNCTIONS */
 int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError); 
-int tankError(Menu* menu, int rightQRD, int leftQRD, int lastError); 
 void correctionApplication(Menu* menu, int correction); 
 void printQRDs(); 
 void printFreq();
@@ -26,40 +25,29 @@ int lastErr = 0;
 int currCount = 0;
 int lastCount = 0;
 int displayCount = 0;
-int offTapeCount = 0;
-int posErrCount = 0;
-int negErrCount = 0;
-int noErrCount = 0;
 
 // QRDs & yellow button
 int leftQRD;
 int rightQRD;
 int sideQRD;
-int frontQRD;
-int wheelQRD;
 int sideRightQRD;
 int switch0 = digitalRead(0);
 
-/* TANK VARIABLES */
-bool reachedTankVar = false;
 
 /*
  * 
  * REGULAR TAPE FOLLOWING
  *          
  */
-void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
+void tapeFollow(Menu* menu, bool gateStage) {
 
   currCount = 0;
   displayCount = 0;
   bool topOfRamp = false;
   bool onRamp = false;
-  int turnCount = 0;
   unsigned long startTime = millis();
   int proportional = 0;
-  int integral = 0;
   int derivative = 0;
-  int maxIntegral = 60; 
   
   /* MAIN LOOP */
   while (true) {
@@ -84,14 +72,8 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
     
     /* CORRECTION CALCULATION */
     proportional = currErr * menu->kp;
-//    integral = currErr * (currCount - lastCount) * menu->ki + integral;
-//    if (integral > maxIntegral) {
-//      integral = maxIntegral;
-//    } else if (integral < 0){
-//      integral = 0;
-//    }
     derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd;
-    int correction = proportional + integral + derivative;
+    int correction = proportional + derivative;
 
     /* CORRECTION APPLICATION */
     correctionApplication(menu, correction);
@@ -99,7 +81,6 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
     if (gateStage) { /* GATE STAGE */
       
       /* STAY STOPPED WHILE THE ALARM IS ON */
-      // 1kHz high is disarmed, 10kHz high is alarmed
       if(analogRead(ONEKHZ) < 100 && (millis() - startTime) > 3500) { 
         LCD.clear(); LCD.home();
         LCD.print("WAITING...");
@@ -137,7 +118,6 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
         LCD.clear(); LCD.home();
         LCD.print("TANK");
         LCD.setCursor(0, 1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
-        delay(4000);
         break;
       }
     }
@@ -159,69 +139,7 @@ void tapeFollow(Menu* menu, bool gateStage, bool leftCourse) {
   }
 }
 
-/*
- * 
- * TAPE FOLLOWING FOR GOING AROUND TANK (AND STOPPING AT TICK MARKS)
- * 
- */
-void aroundTank(Menu* menu) {
-  
-  currCount = 0;
-  displayCount = 0;
-  int lastTickCount = 0;
-  int proportional = 0;
-  int integral = 0;
-  int derivative = 0;
-  int maxIntegral = 60;
-  
-  while (true) {    
-    /* INPUTS */
-    leftQRD = analogRead(LEFT_QRD);
-    rightQRD = analogRead(RIGHT_QRD);
-    sideQRD = analogRead(SIDE_QRD);
-    sideRightQRD = analogRead(SIDE_RIGHT_QRD);
 
-    /* Press YELLOW RESET to switch to user input menu */
-    switch0 = digitalRead(YELLOWBUTTON);
-    if (switch0 == 0) { 
-      delay(1000); 
-      if (switch0 == 0) { break; } 
-    }
-
-    /* ERROR */
-    int currErr = tankError(menu, rightQRD, leftQRD, lastErr);
-
-    /* CORRECTION CALCULATION */
-    proportional = currErr * menu->kp_circle;
-//    integral = currErr * (currCount - lastCount) * menu->ki + integral;
-//    if (integral > maxIntegral) {
-//      integral = maxIntegral;
-//    } else if (integral < 0){
-//      integral = 0;
-//    }
-    derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd_circle;
-    int correction = proportional + integral + derivative;
-
-    /* CORRECTION APPLICATION */
-    correctionApplication(menu, correction);
-
-    /* PRINTS INPUTS AND OUTPUTS */
-    if(displayCount == 30) {
-      printQRDs();
-      displayCount = 0; /* RESET */
-    }
-
-    /* When side QRD senses tape */
-    if(sideQRD > menu->thresh_side && (currCount - lastTickCount) > 1000) {
-      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-      lastTickCount = currCount;
-      break;
-    }
-
-    lastErr = currErr;
-    lastCount = currCount;
-  }
-}
 
 /*
  * 
@@ -259,12 +177,12 @@ void circleFollow(Menu* menu){
   
     /* DETERMINE ERROR */
     int thresh = 200;
-    if (leftQRD < thresh && rightQRD > thresh){ /* SLIGHTLY LEFT */
+    if (leftQRD < thresh && rightQRD > thresh) { /* SLIGHTLY LEFT */
       error = -2;  
-    } else if (leftQRD > thresh && rightQRD > thresh){ /* ON TAPE */
+    } else if (leftQRD > thresh && rightQRD > thresh) { /* ON TAPE */
       error = +1;
-    } else if (leftQRD < thresh && rightQRD < thresh){ /* OFF TAPE */
-      if (lastError < 0){ /* LAST LEFT */
+    } else if (leftQRD < thresh && rightQRD < thresh) { /* OFF TAPE */
+      if (lastError < 0) { /* LAST LEFT */
         error = 0;
       } else if (lastError == 0) { /* LAST RIGHT */
         error = +2;
@@ -282,7 +200,7 @@ void circleFollow(Menu* menu){
   
     /* APPLY CORRECTION */
     int motorSpeed = 100;
-    if (abs(corr) > motorSpeed){
+    if (abs(corr) > motorSpeed) {
       if (corr < 0){
         motor.speed(LEFT_MOTOR, motorSpeed - corr + 11);
         motor.speed(RIGHT_MOTOR, 0);
@@ -296,7 +214,7 @@ void circleFollow(Menu* menu){
     }
 
     /* STOP AT TICKS */
-    if (sideQRD > 150 && currCount - sawLastTick > 2000){
+    if (sideQRD > 150 && currCount - sawLastTick > 2000) {
       motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       LCD.clear(); LCD.home();
       LCD.print("AT TICK MARK");
@@ -311,17 +229,16 @@ void circleFollow(Menu* menu){
       while (!(leftQRD > thresh && rightQRD < thresh)){
         leftQRD = analogRead(LEFT_QRD);
         rightQRD = analogRead(RIGHT_QRD);
-//        motor.speed(LEFT_MOTOR, motorSpeed - 45);
         motor.speed(LEFT_MOTOR, 0);
         motor.speed(RIGHT_MOTOR, motorSpeed + 45);
         currCount = currCount + 1;
       }
-      backUp(350.0);
+      backUp(400.0);
       motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0); /* PAUSE -- ARM MOVEMENTS WOULD GO HERE */
-      delay(2000);
         
       sawLastTick = currCount;  
-      
+
+      break;
     }
     
     /* PRINT VALUES */
@@ -363,45 +280,19 @@ void recoverLostTape(Menu* menu, int currentError, int lastError) {
  */
 int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
   int currentError = 0;
-  if (leftQRD > menu->thresh_left && rightQRD > menu->thresh_right) { /* COMPLETELY ON TAPE */
-    noErrCount = noErrCount + 1;
-    negErrCount = 0;
-    posErrCount = 0;
-  }
   if (leftQRD < menu->thresh_left && rightQRD > menu->thresh_right) { /* SLIGHTLY LEFT OF TAPE */ 
     currentError = -1;
-    if (noErrCount > 0) {
-      noErrCount = noErrCount + 1;
-    } else {
-      negErrCount = negErrCount + 1;
-    }
-    posErrCount = 0;
-    offTapeCount = 0;
   } 
   else if (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right) { /* SLIGHTLY RIGHT OF TAPE */ 
     currentError = 1; 
-    offTapeCount = 0;
-    if (noErrCount > 0) {
-      noErrCount = noErrCount + 1;
-    } else {
-      posErrCount = posErrCount + 1;
-    }
-    negErrCount = 0;
   } 
   else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right){ /* COMPLETELY OFF TAPE */
     if (lastError < 0) { // OFF TO LEFT
       currentError = -2; 
-      negErrCount = negErrCount + 1;
-      posErrCount = 0;
-      noErrCount = 0;
     } 
     else if(lastError > 0) { // OFF TO RIGHT
       currentError = 2; 
-      posErrCount = posErrCount + 1;
-      negErrCount = 0;
-      noErrCount = 0;
     }
-    offTapeCount = offTapeCount + 1;
   }
 
   return currentError;

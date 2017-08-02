@@ -11,11 +11,10 @@
 
 /* FUNCTION DECLARATIONS */
 void locateZipline();
-void rightTurnToTape(Menu* menu);
+void rightTurnToTape(Menu* menu, int occurrences);
 void backUp();
 void driveForward(unsigned long duration);
 void rightTurn(Menu* menu, unsigned long duration);
-
 
 
 /* 
@@ -53,7 +52,7 @@ void locateZipline() {
     if(signal10kHz > THRESH_TENKHZ) {
       motor.speed(LEFT_MOTOR, 0);
       motor.speed(RIGHT_MOTOR, 0);
-      delay(3000);
+      delay(2000);
       break;
     }
   }
@@ -67,10 +66,11 @@ void locateZipline() {
  *  Continues to turn right until robot sees tape 
  *  
  */
-void rightTurnToTape(Menu* menu) {
+void rightTurnToTape(Menu* menu, int occurrences) {
   
   int displayCount = 0;
   int count = 0;
+  int tapeCount = 0;
   
   while(true) {
     count = count + 1;
@@ -97,11 +97,14 @@ void rightTurnToTape(Menu* menu) {
     motor.speed(LEFT_MOTOR, VELOCITY-70);
     motor.speed(RIGHT_MOTOR, 25);
 
-    if(count > 50 && (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right)) {
-      count = 0;
-      motor.speed(LEFT_MOTOR, 0);
-      motor.speed(RIGHT_MOTOR, 0);
-      break;
+    if(count > 1000 && (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right)) {
+      tapeCount = tapeCount + 1;
+      if(tapeCount >= occurrences) {
+        count = 0;
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, 0);
+        break;
+      }
     }
   }
   
@@ -148,6 +151,12 @@ void driveForward(unsigned long duration) {
   
 }
 
+
+/*
+ * 
+ * Makes a right turn for a set duration determined by the function's 'duration' parameter
+ * 
+ */
 void rightTurn(Menu* menu, unsigned long duration) {
 
   unsigned long start = millis();
@@ -175,7 +184,6 @@ void rightTurn(Menu* menu, unsigned long duration) {
   
   motor.speed(LEFT_MOTOR, 0);
   motor.speed(RIGHT_MOTOR, 0);
-  delay(2000);
   
 }
 

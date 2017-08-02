@@ -44,20 +44,20 @@ void loop() {
       start = millis();
 
       gateStage();  /* GO FROM START TO START OF TANK */
-      rampStage(leftCourse); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
+      rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
       if(!leftCourse) {
         driveForward(500.0);
       } else {
         //backUp(200.0);
       }
-      rightTurnToTape(menu);
+      rightTurnToTape(menu, 1); //1 on right course, 2 on left course
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       int countTo = 0;
       if(leftCourse) { countTo = 2; }
       else { countTo = 4; }
       /* NAVIGATE TO SECOND OR FOURTH TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
-        aroundTank(menu); 
+        circleFollow(menu); 
       }
       if(!leftCourse) {
         rightTurn(menu, 500.0);
@@ -66,11 +66,11 @@ void loop() {
       
     } break;
     
-    case 1: { tapeFollow(menu, false /*gateStage*/, true /*leftCourse*/); } break; /* TAPE FOLLOW */ 
+    case 1: { tapeFollow(menu, false /*gateStage*/); } break; /* TAPE FOLLOW */ 
     
     case 2: { /* CIRCLE FOLLOW */
       while(true) {
-        aroundTank(menu); 
+        circleFollow(menu); 
         if (digitalRead(0) == 0) { 
           delay(1000); 
           if (digitalRead(0) == 0) { break; } 
@@ -91,20 +91,33 @@ void loop() {
     
     case 4: { gateStage(); } break; /* GATE STAGE */
     
-    case 5: { rampStage(leftCourse); } break; /* RAMP STAGE */
+    case 5: { rampStage(); } break; /* RAMP STAGE */
     
     case 6: { tankStage(); } break; /* TANK STAGE */
     
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
-      rampStage(false);
-      delay(1000);
-      driveForward(600.0);
-      delay(1000);
-      rightTurnToTape(menu);
-      delay(1000);
-      circleFollow(menu);
+      /* FROM START TO TANK AND AROUND (STOPPING AT TICKS) WITHOUT STOPPING AT GATE */
+      if(!leftCourse) { // right course
+        rampStage();
+        delay(1000);
+        driveForward(450.0);
+        delay(1000);
+        rightTurnToTape(menu, 1);
+        delay(1000);
+        circleFollow(menu);
+      } else { // left course
+        rampStage();
+        delay(1000);
+        driveForward(300.0);
+        delay(1000);
+        motor.speed(LEFT_MOTOR, 35); motor.speed(RIGHT_MOTOR, -115);
+        delay(1300);
+        rightTurnToTape(menu, 2);
+        delay(1000);
+        circleFollow(menu);
+      }
     } break;
     
   }
@@ -139,7 +152,7 @@ void getUserInput() {
     delay(100);
   }
   
-  if (command == 0 || command == 5 || command == 7) {
+  if (command == 0 || command == 5 || command == 8) {
     while (true) {
       /* use TOP_POT to toggle options, press START to select current option */
       leftCourse = 1 - knob(TOP_POT) * 2 / 1024;
@@ -163,20 +176,20 @@ void getUserInput() {
 void gateStage() { 
   
   bool gateStage = true;
-  tapeFollow(menu, gateStage, leftCourse /*doesn't matter*/);
+  tapeFollow(menu, gateStage);
   
 }
 
-void rampStage(bool leftCourse) {
+void rampStage() {
   
   bool gateStage = false;
-  tapeFollow(menu, gateStage, leftCourse);
+  tapeFollow(menu, gateStage);
   
 }
 
 void tankStage() {
   
-  for(int tickCount = 1; tickCount <= 6; tickCount++) {
+  for(int tickCount = 1; tickCount <= 5; tickCount++) {
 
     /* Press YELLOW RESET to switch to user input menu */
     int switch0 = digitalRead(YELLOWBUTTON);
@@ -185,43 +198,34 @@ void tankStage() {
       if (switch0 == 0) { break; } 
     }
 
-    /* TODO clean this up */
-//    bool skipTick = false;
-//    if (tickCount = 1 && millis() - start > 63500){
-//      skipTick = true;
-//    } else if (tickCount = 2 && millis() - start > 68500){
-//      skipTick = true;
-//    } else if (tickCount = 3 && millis() - start > 73500){
-//      skipTick = true;
-//    } else if (tickCount = 4 && millis() - start > 78500){
-//      skipTick = true;
-//    } else if (tickCount = 5 && millis() - start > 83500){
-//      skipTick = true;
-//    } else if (tickCount = 6 && millis() - start > 98500){
-//      skipTick = true;
-//    }
+    bool skipTick = skipTickBool(tickCount);
+    LCD.clear(); LCD.home();
+    LCD.print("Skip Tick? "); LCD.print(skipTick);
+    delay(2000);
 
     /* GO TO NEXT TICK */
-    aroundTank(menu); 
-    delay(1000);
+    circleFollow(menu); 
+    delay(2000);
 
-//    if (!skipTick){
-//    /* PICK UP AGENT */
-//      delay(2000);
-//      raiseArm();
-//      delay(500);
-//      closePincer();
-//      delay(1500);
-//      lowerArm();
-//      delay(1000);
-//      openPincer();
-//    }
+    if (!skipTick){
+    /* PICK UP AGENT */
+      delay(2000);
+      raiseArm();
+      delay(500);
+      closePincer();
+      delay(1500);
+      lowerArm();
+      delay(1000);
+      openPincer();
+    }
     
   }
   
 }
 
-void lineStage() { 
+
+void lineStage() {
+   
   unsigned long duration = 1000.0;
   
   locateZipline(); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
@@ -236,4 +240,18 @@ void lineStage() {
   //backUp(duration); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
   
 }
+
+
+bool skipTickBool(int tickCount) {
+  
+    unsigned long firstDropTime = 60000.0;
+
+    if((millis() - start) > (firstDropTime + 5.0 * (unsigned long) tickCount)) {
+      return true;
+    } else {
+      return false;
+    }
+    
+}
+
 
