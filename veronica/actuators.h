@@ -57,23 +57,16 @@ void shake(){
 
 void raiseLift(){
 
-  int pos = 90;
   unsigned long start = millis();
-  RCServo2.write(pos); /* REST POSITION */
 
   LCD.clear(); LCD.home();
   LCD.print("RAISING");
   
   /* RAISE THE LIFT */
-  while (millis() - start < 2500) { /* TODO find proper duration */
+  while (millis() - start < 4700) { /* TODO find proper duration */
     motor.speed(LIFT_MOTOR, 175);
-
-    //breaking out of loop after specified amount of time
-    if(millis()-start == 2500){
-      motor.speed(LIFT_MOTOR, 0);
-      break;
-    }
   }
+  motor.speed(LIFT_MOTOR, 0);
   
 }
 
@@ -87,15 +80,10 @@ void lowerLift(){
   LCD.print("LOWERING");
 
   /* LOWER THE LIFT */
-  while (millis() - start < 1000){ /* TODO find proper duration */
+  while (millis() - start < 5000){ /* TODO find proper duration */
     motor.speed(LIFT_MOTOR, 5);
-
-    //breaking out of loop after specified amount of time
-    if(millis()-start == 1000){
-      motor.speed(LIFT_MOTOR, 0);
-      break;
-    }
   }
+  motor.speed(LIFT_MOTOR, 0);
   
 }
 
