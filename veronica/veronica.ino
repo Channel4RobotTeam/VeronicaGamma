@@ -29,6 +29,7 @@ unsigned long start;
 void setup() {
   #include <phys253setup.txt>
   Serial.begin(9600);
+  RCServo1.write(10);
   RCServo2.write(90);
   getUserInput();
 }
@@ -89,7 +90,7 @@ void loop() {
       lowerArm();
       delay(1000);
       openPincer();
-      shake();  // might be unnecessary
+      //shake();  // might be unnecessary
     } break; 
     
     case 4: { gateStage(); } break; /* GATE STAGE */
@@ -101,26 +102,27 @@ void loop() {
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
-      /* FROM START TO TANK AND AROUND (STOPPING AT TICKS) WITHOUT STOPPING AT GATE */
-      if(!leftCourse) { // right course
-        rampStage();
-        delay(1000);
-        driveForward(450.0);
-        delay(1000);
-        rightTurnToTape(menu, 1);
-        delay(1000);
-        circleFollow(menu);
-      } else { // left course
-        rampStage();
-        delay(1000);
-        driveForward(300.0);
-        delay(1000);
-        motor.speed(LEFT_MOTOR, 35); motor.speed(RIGHT_MOTOR, -115);
-        delay(1300);
-        rightTurnToTape(menu, 2);
-        delay(1000);
-        circleFollow(menu);
+      
+      LCD.clear(); LCD.home();
+      LCD.print("RAISING");
+
+      while (true){
+        if(startbutton()){
+          LCD.setCursor(0,1);
+          LCD.print("DOING THE THING?");
+          unsigned long liftStart = millis();
+          while(millis() - liftStart < 4500){
+            motor.speed(2, 75);
+          }
+          break; 
+        }
       }
+      
+      motor.speed(2, 0);
+      
+//      raiseArm();
+//      delay(1000);
+//      raiseLift();
     } break;
     
   }
@@ -192,7 +194,7 @@ void rampStage() {
 
 void tankStage() {
   
-  for(int tickCount = 1; tickCount <= 5; tickCount++) {
+  for(int tickCount = 1; tickCount <= 6; tickCount++) {
 
     /* Press YELLOW RESET to switch to user input menu */
     int switch0 = digitalRead(YELLOWBUTTON);
@@ -201,16 +203,16 @@ void tankStage() {
       if (switch0 == 0) { break; } 
     }
 
-    bool skipTick = skipTickBool(tickCount);
-    LCD.clear(); LCD.home();
-    LCD.print("Skip Tick? "); LCD.print(skipTick);
-    delay(2000);
+//    bool skipTick = skipTickBool(tickCount);
+//    LCD.clear(); LCD.home();
+//    LCD.print("Skip Tick? "); LCD.print(skipTick);
+//    delay(2000);
 
     /* GO TO NEXT TICK */
     circleFollow(menu); 
-    delay(2000);
+    delay(500);
 
-    if (!skipTick){
+//    if (!skipTick){
     /* PICK UP AGENT */
       delay(2000);
       raiseArm();
@@ -220,7 +222,7 @@ void tankStage() {
       lowerArm();
       delay(1000);
       openPincer();
-    }
+//    }
     
   }
   
@@ -234,13 +236,13 @@ void lineStage() {
   locateZipline(); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
   delay(1000);
   backUp(duration); /* REALIGN */
-//  raiseArm(); /* GET ARM OUT OF THE WAY */
+  raiseArm(); /* GET ARM OUT OF THE WAY */
   delay(1000);
-//  raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
-//  delay(2000);
+  raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
+  delay(2000);
   driveForward(duration); /* DRIVES THE BASKET ONTO THE ZIPLINE */
-//  lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
-  //backUp(duration); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
+  lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
+  backUp(duration); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
   
 }
 

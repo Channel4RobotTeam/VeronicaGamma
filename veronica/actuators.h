@@ -20,7 +20,7 @@ void raiseArm() {
 
 /*Close Pincer*/
 void closePincer() {
-  for(int pos1 = 0 ; pos1<=(90) ; pos1+=1){
+  for(int pos1 = 10 ; pos1<=(90) ; pos1+=1){
     RCServo1.write(pos1);
   }
 }
@@ -39,7 +39,7 @@ void openPincer() {
     RCServo1.write(pos1);
   }
   delay(500);
-  for(int pos1 = 25; pos1>=0 ; pos1 -= 1){
+  for(int pos1 = 25; pos1>=10 ; pos1 -= 1){
           RCServo1.write(pos1);
           delay(10);
   }
@@ -65,24 +65,16 @@ void raiseLift() {
   LCD.print("RAISING");
   
   /* RAISE THE LIFT */
-  while (millis() - start < 4700) { /* TODO find proper duration */
+  while (millis() - start < 10000) { /* TODO find proper duration */
     motor.speed(LIFT_MOTOR, 175);
-    
-    //breaking out of loop after specified amount of time
-    if(millis() - start == 2500){
-      motor.speed(LIFT_MOTOR, 0);
-      break;
-    }
   }
   motor.speed(LIFT_MOTOR, 0);
   
 }
 
 void lowerLift() {
-
-  int pos = 90;
+  
   unsigned long start = millis();
-  RCServo2.write(pos); /* REST POSITION */
 
   LCD.clear(); LCD.home();
   LCD.print("LOWERING");
