@@ -46,11 +46,14 @@ void loop() {
       gateStage();  /* GO FROM START TO START OF TANK */
       rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
       if(!leftCourse) {
-        driveForward(500.0);
+        driveForward(450.0);
+        rightTurnToTape(menu, 1);
       } else {
-        //backUp(200.0);
+        driveForward(300.0);
+        motor.speed(LEFT_MOTOR, 35); motor.speed(RIGHT_MOTOR, -115);
+        delay(1300);
+        rightTurnToTape(menu, 2);
       }
-      rightTurnToTape(menu, 1); //1 on right course, 2 on left course
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       int countTo = 0;
       if(leftCourse) { countTo = 2; }
