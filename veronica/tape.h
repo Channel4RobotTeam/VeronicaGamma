@@ -11,7 +11,6 @@
 
 /* FUNCTIONS DECLARATIONS */
 void tapeFollow(Menu* menu);
-void recoverLostTape(Menu* menu, int currentError, int lastError);
 void circleFollow(Menu* menu);
 
 /* HELPER FUNCTIONS */
@@ -20,13 +19,7 @@ void correctionApplication(Menu* menu, int correction);
 void printQRDs(); 
 void printFreq();
 
-/* TAPE FOLLOWING VARIABLES */
-int lastErr = 0;
-int currCount = 0;
-int lastCount = 0;
-int displayCount = 0;
-
-// QRDs & yellow button
+/* QRDs and YELLOW button */
 int leftQRD;
 int rightQRD;
 int sideQRD;
@@ -41,11 +34,17 @@ int switch0 = digitalRead(0);
  */
 void tapeFollow(Menu* menu, bool gateStage) {
 
-  currCount = 0;
-  displayCount = 0;
+  /* TAPE FOLLOWING VARIABLES */
+  int currCount = 0;
+  int displayCount = 0;
+  int lastCount = 0;
+  
+  int lastErr = 0;
+  
   bool topOfRamp = false;
-  bool onRamp = false;
+  
   unsigned long startTime = millis();
+  
   int proportional = 0;
   int derivative = 0;
   
@@ -77,39 +76,31 @@ void tapeFollow(Menu* menu, bool gateStage) {
 
     /* CORRECTION APPLICATION */
     correctionApplication(menu, correction);
-    
+
     if (gateStage) { /* GATE STAGE */
       
       /* STAY STOPPED WHILE THE ALARM IS ON */
-      if(analogRead(ONEKHZ) < 100 && (millis() - startTime) > 3500) { 
-        LCD.clear(); LCD.home();
-        LCD.print("WAITING...");
-        int j = 0;
-        while (analogRead(ONEKHZ) < 100){
-          motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-          j = j + 1;
-          if (j == 30) {
-            LCD.setCursor(0,1);
-            LCD.print("1kHz: "); LCD.print(analogRead(ONEKHZ));
-            j = 0;
-          }
+      int j = 0;
+      while(analogRead(ONEKHZ) < 180) {
+        j = j + 1;
+        
+        if(j == 30) {
+          LCD.clear(); LCD.home();
+          LCD.print("waiting...");
+          LCD.setCursor(0, 1);
+          LCD.print("1kHz: "); LCD.print(analogRead(ONEKHZ));
         }
-        delay(2000);
-        break; /* GATE STAGE ENDS WHEN DOOR DISARMS */
+        
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       }
-      
+      if(analogRead(ONEKHZ) > 900) {
+        break;
+      }
     } else { /* RAMP STAGE */
       
       /* RECOGNIZE WHEN THE TOP OF THE RAMP IS REACHED */
       if (digitalRead(RAMP_SWITCH) == 0) {
         topOfRamp = true;
-      }
-
-      if (displayCount == 30 && topOfRamp) {
-        LCD.clear(); LCD.home(); 
-        LCD.print("TOP OF RAMP");
-        LCD.setCursor(0,1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
-        displayCount = 0; /* RESET */
       }
 
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
@@ -120,12 +111,20 @@ void tapeFollow(Menu* menu, bool gateStage) {
         LCD.setCursor(0, 1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
         break;
       }
+      
+      if (displayCount == 30 && topOfRamp) {
+        LCD.clear(); LCD.home(); 
+        LCD.print("TOP OF RAMP");
+        LCD.setCursor(0,1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
+        displayCount = 0; /* RESET */
+      }
     }
     
     /* PRINTS INPUTS AND OUTPUTS */
     if(displayCount == 30 && !topOfRamp) {
       /* FOR DEBUGGING THE QRDs */
-      printQRDs();
+//      printQRDs();
+        printFreq();
       /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
 //      LCD.clear(); LCD.home();
 //      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
@@ -149,8 +148,8 @@ void tapeFollow(Menu* menu, bool gateStage) {
 void circleFollow(Menu* menu){
 
   /* INITIALIZE VARIABLES */
-  currCount = 0;
-  displayCount = 0;
+  int currCount = 0;
+  int displayCount = 0;
   int error = -1;
   int lastError = 0;
   int lastCount = 0;
@@ -218,7 +217,6 @@ void circleFollow(Menu* menu){
       motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       LCD.clear(); LCD.home();
       LCD.print("AT TICK MARK");
-      delay(2000);
 
       /* LINE UP WITH TOY FOR ARM */
       LCD.setCursor(0,1);
@@ -258,20 +256,6 @@ void circleFollow(Menu* menu){
   
 }
 
-/*
- * 
- * MISC HELPER FUNCTIONS
- * 
- */
-void recoverLostTape(Menu* menu, int currentError, int lastError) {
-  if(currentError < 0) {
-    motor.speed(LEFT_MOTOR, menu->velocity+25);
-    motor.speed(RIGHT_MOTOR, menu->velocity-50);
-  } else {
-    motor.speed(LEFT_MOTOR, menu->velocity+25);
-    motor.speed(RIGHT_MOTOR, menu->velocity-50);
-  }
-}
 
 /*
  * 

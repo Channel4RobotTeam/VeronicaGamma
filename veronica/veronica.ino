@@ -65,7 +65,7 @@ void loop() {
         circleFollow(menu); 
       }
       if(!leftCourse) {
-        rightTurn(menu, 500.0);
+        rightTurn(menu, 5000.0);
       }
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
       
@@ -104,9 +104,10 @@ void loop() {
 
     case 8: { /* MISC TEST */ 
 
-      raiseLift();
-      delay(1000);
-      lowerLift();
+        rightTurn(menu, 5000.0);
+//      raiseLift();
+//      delay(1000);
+//      lowerLift();
 
     } break;
     
@@ -219,15 +220,15 @@ void lineStage() {
   unsigned long duration = 1000.0;
   
 //  locateZipline(); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
-//  delay(1000);
-//  backUp(duration); /* REALIGN */
+  driveForward(2300.0);
+  delay(1000);
   raiseArm(); /* GET ARM OUT OF THE WAY */
   delay(1000);
   raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
   delay(2000);
-  driveForward(duration); /* DRIVES THE BASKET ONTO THE ZIPLINE */
+  driveForward(1500.0); /* DRIVES THE BASKET ONTO THE ZIPLINE */
   lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
-  backUp(4000.0); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
+  backUp(5500.0); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
   lowerArm();
   
 }
