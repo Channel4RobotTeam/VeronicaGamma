@@ -53,7 +53,7 @@ void loop() {
       } else {
         driveForward(300.0);
         motor.speed(LEFT_MOTOR, 35); motor.speed(RIGHT_MOTOR, -115);
-        delay(1300);
+        delay(1000);
         rightTurnToTape(menu, 2);
       }
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
