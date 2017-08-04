@@ -30,7 +30,8 @@ void setup() {
   #include <phys253setup.txt>
   Serial.begin(9600);
   RCServo1.write(10);
-  RCServo2.write(90);
+//  RCServo2.write(90);
+  analogWrite(37,0);
   getUserInput();
 }
 
@@ -102,27 +103,11 @@ void loop() {
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
-      
-      LCD.clear(); LCD.home();
-      LCD.print("RAISING");
 
-      while (true){
-        if(startbutton()){
-          LCD.setCursor(0,1);
-          LCD.print("DOING THE THING?");
-          unsigned long liftStart = millis();
-          while(millis() - liftStart < 4500){
-            motor.speed(2, 75);
-          }
-          break; 
-        }
-      }
-      
-      motor.speed(2, 0);
-      
-//      raiseArm();
-//      delay(1000);
-//      raiseLift();
+      raiseLift();
+      delay(1000);
+      lowerLift();
+
     } break;
     
   }
@@ -157,7 +142,7 @@ void getUserInput() {
     delay(100);
   }
   
-  if (command == 0 || command == 5 || command == 8) {
+  if (command == 0 || command == 5) {
     while (true) {
       /* use TOP_POT to toggle options, press START to select current option */
       leftCourse = 1 - knob(TOP_POT) * 2 / 1024;
@@ -233,16 +218,17 @@ void lineStage() {
    
   unsigned long duration = 1000.0;
   
-  locateZipline(); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
-  delay(1000);
-  backUp(duration); /* REALIGN */
+//  locateZipline(); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
+//  delay(1000);
+//  backUp(duration); /* REALIGN */
   raiseArm(); /* GET ARM OUT OF THE WAY */
   delay(1000);
   raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
   delay(2000);
   driveForward(duration); /* DRIVES THE BASKET ONTO THE ZIPLINE */
   lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
-  backUp(duration); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
+  backUp(4000.0); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
+  lowerArm();
   
 }
 

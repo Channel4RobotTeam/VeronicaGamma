@@ -59,31 +59,33 @@ void shake() {
 
 void raiseLift() {
 
-  unsigned long start = millis();
-
+  unsigned long startTime = millis();
   LCD.clear(); LCD.home();
-  LCD.print("RAISING");
-  
-  /* RAISE THE LIFT */
-  while (millis() - start < 10000) { /* TODO find proper duration */
-    motor.speed(LIFT_MOTOR, 175);
-  }
-  motor.speed(LIFT_MOTOR, 0);
+    
+  /*raise*/
+  while (millis() - startTime < /*6800*/ 6000){
+    LCD.home();
+    LCD.print("raising");
+    analogWrite(37, 100);
+  } 
+
+  analogWrite(37, 0);
   
 }
 
 void lowerLift() {
   
-  unsigned long start = millis();
-
+  unsigned long startTime = millis();
   LCD.clear(); LCD.home();
-  LCD.print("LOWERING");
 
-  /* LOWER THE LIFT */
-  while (millis() - start < 5000){ /* TODO find proper duration */
-    motor.speed(LIFT_MOTOR, 5);
+  /*lower*/
+  while (millis() - startTime < 3000){
+    LCD.home();
+    LCD.print("lowering");
+    analogWrite(37, 30);
   }
-  motor.speed(LIFT_MOTOR, 0);
+
+  analogWrite(37, 0);
   
 }
 
