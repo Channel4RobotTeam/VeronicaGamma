@@ -35,9 +35,9 @@
 
 /* DEFAULTS MENU VALUES */
 #define VELOCITY 150
-#define KP 48
+#define KP 51
 #define KI 5
-#define KD 78
+#define KD 81
 #define KP_CIRCLE 40
 #define KI_CIRCLE 0
 #define KD_CIRCLE 75

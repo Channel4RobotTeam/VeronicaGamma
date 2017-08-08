@@ -30,7 +30,6 @@ void setup() {
   #include <phys253setup.txt>
   Serial.begin(9600);
   RCServo1.write(10);
-//  RCServo2.write(90);
   analogWrite(37,0);
   getUserInput();
 }
@@ -48,25 +47,30 @@ void loop() {
       gateStage();  /* GO FROM START TO START OF TANK */
       rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
       if(!leftCourse) {
-        driveForward(450.0);
+        driveForward(400.0);
         rightTurnToTape(menu, 1);
       } else {
-        driveForward(300.0);
+        driveForward(400.0);
         motor.speed(LEFT_MOTOR, 35); motor.speed(RIGHT_MOTOR, -115);
         delay(1000);
         rightTurnToTape(menu, 2);
       }
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
-      int countTo = 0;
-      if(leftCourse) { countTo = 2; }
-      else { countTo = 4; }
+      if(!leftCourse) { /* TURN AROUND */
+        rightTurnToTape(menu, 1);
+        rightTurnToTape(menu, 1);
+        rightTurnToTape(menu, 1);
+      }
+      int countTo = 2;
+//      if(leftCourse) { countTo = 2; }
+//      else { countTo = 4; }
       /* NAVIGATE TO SECOND OR FOURTH TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
         circleFollow(menu); 
       }
-      if(!leftCourse) {
-        rightTurn(menu, 5000.0);
-      }
+//      if(!leftCourse) {
+//        rightTurn(menu, 5000.0);
+//      }
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
       
     } break;
@@ -91,7 +95,6 @@ void loop() {
       lowerArm();
       delay(1000);
       openPincer();
-      //shake();  // might be unnecessary
     } break; 
     
     case 4: { gateStage(); } break; /* GATE STAGE */
@@ -103,11 +106,18 @@ void loop() {
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
-
-        rightTurn(menu, 5000.0);
-//      raiseLift();
-//      delay(1000);
-//      lowerLift();
+        
+      tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
+      if(!leftCourse) { /* TURN AROUND */
+        rightTurnToTape(menu, 1);
+        rightTurnToTape(menu, 1);
+        rightTurnToTape(menu, 1);
+      }
+      int countTo = 2;
+      for (int i = 0; i < countTo; i = i + 1) {
+        circleFollow(menu); 
+      }
+      lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
 
     } break;
     
@@ -200,13 +210,12 @@ void tankStage() {
 
 //    if (!skipTick){
     /* PICK UP AGENT */
-      delay(2000);
       raiseArm();
-      delay(500);
+      delay(100);
       closePincer();
-      delay(1500);
+      delay(500);
       lowerArm();
-      delay(1000);
+      delay(500);
       openPincer();
 //    }
     
@@ -217,18 +226,18 @@ void tankStage() {
 
 void lineStage() {
    
-  unsigned long duration = 1000.0;
-  
 //  locateZipline(); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
-  driveForward(2300.0);
+//  driveForward(2300.0); /* DRIVES FORWARD A HARDCODED DISTANCE TO ZIPLINE */
+  rightTurn(menu, 600.0); driveForward(200.0); leftTurn(menu, 550.0);
+  driveForward(1500.0);
   delay(1000);
   raiseArm(); /* GET ARM OUT OF THE WAY */
   delay(1000);
   raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
   delay(2000);
-  driveForward(1500.0); /* DRIVES THE BASKET ONTO THE ZIPLINE */
+  driveForward(2000.0); /* DRIVES THE BASKET ONTO THE ZIPLINE */
   lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
-  backUp(5500.0); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
+  backUp(5900.0); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
   lowerArm();
   
 }

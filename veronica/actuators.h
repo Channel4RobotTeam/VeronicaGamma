@@ -63,7 +63,7 @@ void raiseLift() {
   LCD.clear(); LCD.home();
     
   /*raise*/
-  while (millis() - startTime < /*6800*/ 6000){
+  while (millis() - startTime < /*6800*/ 7600){
     LCD.home();
     LCD.print("raising");
     analogWrite(37, 100);
@@ -79,7 +79,7 @@ void lowerLift() {
   LCD.clear(); LCD.home();
 
   /*lower*/
-  while (millis() - startTime < 3000){
+  while (millis() - startTime < 3300){
     LCD.home();
     LCD.print("lowering");
     analogWrite(37, 30);

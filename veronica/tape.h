@@ -121,17 +121,17 @@ void tapeFollow(Menu* menu, bool gateStage) {
     }
     
     /* PRINTS INPUTS AND OUTPUTS */
-    if(displayCount == 30 && !topOfRamp) {
-      /* FOR DEBUGGING THE QRDs */
+//    if(displayCount == 30 && !topOfRamp) {
+//      /* FOR DEBUGGING THE QRDs */
 //      printQRDs();
         printFreq();
-      /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
-//      LCD.clear(); LCD.home();
-//      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
-//      LCD.setCursor(0,1);
-//      LCD.print("Count: "); LCD.print(currCount);
-      displayCount = 0; /* RESET */
-    }
+//      /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
+////      LCD.clear(); LCD.home();
+////      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
+////      LCD.setCursor(0,1);
+////      LCD.print("Count: "); LCD.print(currCount);
+//      displayCount = 0; /* RESET */
+//    }
 
     lastErr = currErr;
     lastCount = currCount;

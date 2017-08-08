@@ -187,3 +187,33 @@ void rightTurn(Menu* menu, unsigned long duration) {
   
 }
 
+void leftTurn(Menu* menu, unsigned long duration) {
+
+  unsigned long start = millis();
+  int displayCount = 0;
+
+  while(millis() - start < duration) {
+
+    /* Press YELLOW RESET to switch to user input menu */
+    int switch0 = digitalRead(0);
+    if (switch0 == 0) { 
+      delay(1000); 
+      if (switch0 == 0) { break; } 
+    }
+    
+    displayCount = displayCount + 1;
+    if(displayCount == 30) {
+      LCD.clear(); LCD.home();
+      LCD.print(" stat RIGHT TURN");
+      displayCount = 0;
+    }
+    
+    motor.speed(LEFT_MOTOR, -70);
+    motor.speed(RIGHT_MOTOR, 70);
+  }
+  
+  motor.speed(LEFT_MOTOR, 0);
+  motor.speed(RIGHT_MOTOR, 0);
+  
+}
+
