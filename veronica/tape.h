@@ -110,7 +110,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
       }
 
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
-      if(topOfRamp && sideRightQRD > menu->thresh_sideRight) {
+      if(topOfRamp && sideRightQRD > menu->thresh_side) {
         motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
         LCD.clear(); LCD.home();
         LCD.print("TANK");
@@ -128,14 +128,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
     
     /* PRINTS INPUTS AND OUTPUTS */
     if(displayCount == 30 && !topOfRamp) {
-//      /* FOR DEBUGGING THE QRDs */
       printQRDs();
-//        printFreq();
-//      /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
-////      LCD.clear(); LCD.home();
-////      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
-////      LCD.setCursor(0,1);
-////      LCD.print("Count: "); LCD.print(currCount);
       displayCount = 0; /* RESET */
     }
 
@@ -151,7 +144,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
  * FOLLOW THE OUTSIDE OF THE CIRCLE
  * 
  */
-void circleFollow(Menu* menu, int tickCount) {
+void circleFollow(Menu* menu) {
 
   /* INITIALIZE VARIABLES */
   int currCount = 0;
@@ -181,7 +174,7 @@ void circleFollow(Menu* menu, int tickCount) {
     sideQRD = analogRead(SIDE_QRD);
   
     /* DETERMINE ERROR */
-    int thresh = 200;
+    int thresh = menu->thresh;
     if (leftQRD < thresh && rightQRD > thresh) { /* SLIGHTLY LEFT */
       error = -2;  
     } else if (leftQRD > thresh && rightQRD > thresh) { /* ON TAPE */
@@ -225,22 +218,136 @@ void circleFollow(Menu* menu, int tickCount) {
       LCD.print("AT TICK MARK");
 
       /* LINE UP WITH TOY FOR ARM */
-      if (tickCount != 1){
-        LCD.setCursor(0,1);
-        LCD.print("CORRECTING");
+      LCD.setCursor(0,1);
+      LCD.print("CORRECTING");
+      leftQRD = analogRead(LEFT_QRD);
+      rightQRD = analogRead(RIGHT_QRD);
+      unsigned long startCorr = millis();
+      while (!(leftQRD > thresh && rightQRD < thresh)){
         leftQRD = analogRead(LEFT_QRD);
         rightQRD = analogRead(RIGHT_QRD);
-        unsigned long startCorr = millis();
-        while (!(leftQRD > thresh && rightQRD < thresh)){
-          leftQRD = analogRead(LEFT_QRD);
-          rightQRD = analogRead(RIGHT_QRD);
-          motor.speed(LEFT_MOTOR, 0);
-          motor.speed(RIGHT_MOTOR, motorSpeed + 45);
-          currCount = currCount + 1;
-        }
-        backUp(400.0);
-        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0); /* PAUSE -- ARM MOVEMENTS WOULD GO HERE */
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, motorSpeed + 45);
+        currCount = currCount + 1;
       }
+      backUp(400.0);
+      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0); /* PAUSE -- ARM MOVEMENTS WOULD GO HERE */
+        
+      sawLastTick = currCount;  
+
+      break;
+    }
+    
+    /* PRINT VALUES */
+    if (displayCount == 30){
+      LCD.clear(); LCD.home();
+      LCD.print("Err: "); LCD.print(error);
+      LCD.setCursor(0,1);
+      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
+      displayCount = 0;
+    }
+  
+    /* UPDATE LAST VALUES */
+    lastError = error;
+    lastCount = currCount;
+            
+  }
+  
+}
+
+/*
+ * 
+ * FOLLOW THE OUTSIDE OF THE CIRCLE IN THE CLOCKWISE DIRECTION
+ * 
+ */
+void clockwiseCircleFollow(Menu* menu) {
+
+  /* INITIALIZE VARIABLES */
+  int currCount = 0;
+  int displayCount = 0;
+  int error = -1;
+  int lastError = 0;
+  int lastCount = 0;
+  int sawLastTick = 0;
+
+  /* MAIN LOOP */
+  while (true) {
+
+    /* INCREMENT COUNTERS */
+    currCount = currCount + 1;
+    displayCount = displayCount + 1;
+
+    /* BREAK IF YELLOW BUTTON PUSHED */
+    switch0 = digitalRead(YELLOWBUTTON);
+    if (switch0 == 0) { 
+      delay(1000); 
+      if (switch0 == 0) { break; } 
+    }
+  
+    /* READ INPUTS */
+    leftQRD = analogRead(LEFT_QRD);
+    rightQRD = analogRead(RIGHT_QRD);
+    sideQRD = analogRead(SIDE_QRD);
+  
+    /* DETERMINE ERROR */
+    int thresh = menu->thresh;
+    if (leftQRD > thresh && rightQRD < thresh) { /* SLIGHTLY RIGHT */
+      error = +2;  
+    } else if (leftQRD > thresh && rightQRD > thresh) { /* ON TAPE */
+      error = +1;
+    } else if (leftQRD < thresh && rightQRD < thresh) { /* OFF TAPE */
+      if (lastError > 0) { /* LAST RIGHT */
+        error = 0;
+      } else if (lastError == 0) { /* LAST LEFT */
+        error = -2;
+      }
+    } else { /* MUST BE SLIGHTLY LEFT */
+      error = 0;
+    }
+  
+    /* DETERMINE CORRECTION */
+    int kp = 20;
+    int kd = 35;
+    int proportional = error * kp;
+    int derivative = ((error - lastError) / (currCount - lastCount)) * kd;
+    int corr = proportional + derivative;
+  
+    /* APPLY CORRECTION */
+    int motorSpeed = 100;
+    if (abs(corr) > motorSpeed) {
+      if (corr < 0){
+        motor.speed(LEFT_MOTOR, motorSpeed - corr + 11);
+        motor.speed(RIGHT_MOTOR, 0);
+      } else {
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, motorSpeed + corr);
+      }
+    } else {
+      motor.speed(LEFT_MOTOR, motorSpeed - corr + 11);
+      motor.speed(RIGHT_MOTOR, motorSpeed + corr);
+    }
+
+    /* STOP AT TICKS */
+    if (sideQRD > 150 && currCount - sawLastTick > 2000) {
+      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+      LCD.clear(); LCD.home();
+      LCD.print("AT TICK MARK");
+
+      /* LINE UP WITH TOY FOR ARM */
+      LCD.setCursor(0,1);
+      LCD.print("CORRECTING");
+      leftQRD = analogRead(LEFT_QRD);
+      rightQRD = analogRead(RIGHT_QRD);
+      unsigned long startCorr = millis();
+      while (!(leftQRD < thresh && rightQRD > thresh)){
+        leftQRD = analogRead(LEFT_QRD);
+        rightQRD = analogRead(RIGHT_QRD);
+        motor.speed(LEFT_MOTOR, motorSpeed + 45);
+        motor.speed(RIGHT_MOTOR, 0);
+        currCount = currCount + 1;
+      }
+      backUp(400.0);
+      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0); /* PAUSE -- ARM MOVEMENTS WOULD GO HERE */
         
       sawLastTick = currCount;  
 
@@ -271,14 +378,17 @@ void circleFollow(Menu* menu, int tickCount) {
  * 
  */
 int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
+
+  int thresh = menu->thresh;
+  
   int currentError = 0;
-  if (leftQRD < menu->thresh_left && rightQRD > menu->thresh_right) { /* SLIGHTLY LEFT OF TAPE */ 
+  if (leftQRD < thresh && rightQRD > thresh) { /* SLIGHTLY LEFT OF TAPE */ 
     currentError = -1;
   } 
-  else if (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right) { /* SLIGHTLY RIGHT OF TAPE */ 
+  else if (leftQRD > thresh && rightQRD < thresh) { /* SLIGHTLY RIGHT OF TAPE */ 
     currentError = 1; 
   } 
-  else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right){ /* COMPLETELY OFF TAPE */
+  else if (leftQRD < thresh && rightQRD < thresh){ /* COMPLETELY OFF TAPE */
     if (lastError < 0) { // OFF TO LEFT
       currentError = -2; 
     } 
@@ -288,53 +398,43 @@ int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
   }
 
   return currentError;
-}
-
-int tankError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
-  int currentError = 0;
-  if (leftQRD < menu->thresh_left && rightQRD > menu->thresh_right) { /* SLIGHTLY LEFT OF TAPE */ 
-      currentError = -1; 
-    } 
-  else if (leftQRD > menu->thresh_left && rightQRD > menu->thresh_right) { /* ON TAPE */
-    currentError = 0;
-  }
-  else if (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right) { /* SLIGHTLY RIGHT OF TAPE */ 
-    currentError = 1; 
-  } 
-  else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right) { /* COMPLETELY OFF TAPE */
-    if(lastError == 0 || lastError > 0) { currentError = 3; } // extremely right of desired position
-    else { currentError = -2; }
-  }
-
-  return currentError;
+  
 }
 
 void correctionApplication(Menu* menu, int correction) {
-  if (menu->velocity + correction < 0 || menu->velocity - correction < 0) {
+
+  int vel = menu->velocity;
+  
+  if (vel + correction < 0 || vel - correction < 0) {
     if (correction < 0) {
-      motor.speed(LEFT_MOTOR, menu->velocity - correction);
+      motor.speed(LEFT_MOTOR, vel - correction);
       motor.speed(RIGHT_MOTOR, 0);
     } else {
       motor.speed(LEFT_MOTOR, 0);
-      motor.speed(RIGHT_MOTOR, menu->velocity + correction);
+      motor.speed(RIGHT_MOTOR, vel + correction);
     }
   } else {
-    motor.speed(LEFT_MOTOR, menu->velocity - correction);
-    motor.speed(RIGHT_MOTOR, menu->velocity + correction);
+    motor.speed(LEFT_MOTOR, vel - correction);
+    motor.speed(RIGHT_MOTOR, vel + correction);
   }
+  
 }
 
 void printQRDs() {
+  
   LCD.clear(); LCD.home();
   LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(", R: "); LCD.print(analogRead(RIGHT_QRD));
   LCD.setCursor(0,1);
   LCD.print("SR:"); LCD.print(analogRead(SIDE_RIGHT_QRD)); LCD.print(", S: "); LCD.print(analogRead(SIDE_QRD)); LCD.print(" "); LCD.print(digitalRead(RAMP_SWITCH));
+
 }
 
 void printFreq() {
+
   LCD.clear(); LCD.home();
   LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(" R: "); LCD.print(analogRead(RIGHT_QRD));
   LCD.setCursor(0,1);
   LCD.print("1: "); LCD.print(analogRead(ONEKHZ)); LCD.print(" 10: "); LCD.print(analogRead(TENKHZ)); LCD.print(" "); LCD.print(digitalRead(RAMP_SWITCH));  
+
 }
 

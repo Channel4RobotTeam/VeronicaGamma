@@ -16,7 +16,6 @@ void backUp();
 void driveForward(unsigned long duration);
 void rightTurn(Menu* menu, unsigned long duration);
 
-
 /* 
  *  
  *  Drives straight forward until senses 10kHz signal and then stops 
@@ -96,7 +95,9 @@ void rightTurnToTape(Menu* menu, int occurrences) {
     
     motor.speed(LEFT_MOTOR, 135); motor.speed(RIGHT_MOTOR, -145);
 
-    if(count > 1000 && (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right)) {
+    int thresh = menu->thresh;
+
+    if(count > 1000 && (leftQRD > thresh && rightQRD < thresh)) {
       tapeCount = tapeCount + 1;
       if(tapeCount >= occurrences) {
         count = 0;

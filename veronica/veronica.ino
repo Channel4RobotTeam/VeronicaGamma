@@ -1,19 +1,3 @@
-/********************************/
-/*                              */
-/*          THE BRAIN!          */
-/*                              */
-/********************************/
-
-/*
- * 
- * Channel 4 News Team
- * Veronica
- * July 2017
- * 
- * Includes startup code and directs the robot's actions.
- * 
- */
-
 #include <phys253.h>
 #include <LiquidCrystal.h>
 
@@ -21,189 +5,183 @@
 #include "tape.h"
 #include "constants.h"
 
-int command = 0;
+/* FUNCTION DECLARATIONS */
+void leftHandCourse();
+void rightHandCourse();
+void gateStage();
+void rampStage();
+void tankStage();
+void lineStage();
+
 bool leftCourse = true;
 Menu* menu = new Menu();
 unsigned long start;
 
 void setup() {
+  
   #include <phys253setup.txt>
   Serial.begin(9600);
+
+  /* set motors to neutral positions */
+  motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
   RCServo1.write(10);
   analogWrite(37,0);
-  getUserInput();
+
+  /* get left or right course */
+  LCD.clear(); LCD.home();
+  LCD.print("<stop> for LHS");
+  LCD.setCursor(0,1);
+  LCD.print("<start> for RHS");
+  while(true){
+    if (stopbutton()){
+      delay(100);
+      if (stopbutton()){
+        leftCourse = true;
+        break;
+      }
+    }
+    if (startbutton()){
+      delay(100);
+      if (startbutton()){
+        leftCourse = false;
+        break;
+      }
+    }
+  }
+
+  /* get start time */
+  start = millis();
+  
 }
 
 void loop() {
 
-  displayMenu(menu);
-    
-  switch (command) {
-    
-    case 0: { /* RUN FULL COURSE */
+  LCD.clear(); LCD.home();
 
-      start = millis();
-
-      gateStage();  /* GO FROM START TO START OF TANK */
-      rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
-      if(!leftCourse) {
-        driveForward(350.0);
-        rightTurnToTape(menu, 1);
-      } else {
-        /* CORRECT ONTO CIRCLE */
-        driveForward(460.0);
-        rightTurnToTape(menu, 1);
-        leftQRD = analogRead(LEFT_QRD);
-        rightQRD = analogRead(RIGHT_QRD);
-        rightTurn(menu, 300.0);
-        while(!(leftQRD > THRESH_LEFT)){
-          motor.speed(LEFT_MOTOR, 80); motor.speed(RIGHT_MOTOR, 100);
-          leftQRD = analogRead(LEFT_QRD);
-          rightQRD = analogRead(RIGHT_QRD);
-        }
-        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-      }
-      tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
-      if(!leftCourse) { /* TURN AROUND */
-        rightTurnToTape(menu, 1);
-      }
-      int countTo;
-      if(!leftCourse) {
-        countTo = 2;
-      } else {
-        countTo = 1;
-      }
-      /* NAVIGATE TO ZIPLINE TICK MARK */
-      for (int i = 0; i < countTo; i = i + 1) {
-        circleFollow(menu, 2); //TODO change this
-      }
-      lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
-      
-    } break;
-    
-    case 1: { tapeFollow(menu, false /*gateStage*/); } break; /* TAPE FOLLOW */ 
-    
-    case 2: { /* CIRCLE FOLLOW */
-      while(true) {
-        circleFollow(menu, 2); //TODO change this 
-        if (digitalRead(0) == 0) { 
-          delay(1000); 
-          if (digitalRead(0) == 0) { break; } 
-        }
-      }
-    } break; 
-    
-    case 3: { /* TEST ARM */
-      raiseArm();
-      delay(500);
-      closePincer();
-      delay(1500);
-      lowerArm();
-      delay(1000);
-      openPincer();
-    } break; 
-    
-    case 4: { gateStage(); } break; /* GATE STAGE */
-    
-    case 5: { rampStage(); } break; /* RAMP STAGE */
-    
-    case 6: { tankStage(); } break; /* TANK STAGE */
-    
-    case 7: { lineStage(); } break; /* LINE STAGE */
-
-    case 8: { /* MISC TEST */ 
-        
-      start = millis();
-
-      rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
-      if(!leftCourse) {
-        driveForward(350.0);
-        rightTurnToTape(menu, 1);
-      } else {
-        /* CORRECT ONTO CIRCLE */
-        driveForward(460.0);
-        rightTurnToTape(menu, 1);
-        leftQRD = analogRead(LEFT_QRD);
-        rightQRD = analogRead(RIGHT_QRD);
-        rightTurn(menu, 300.0);
-        while(!(leftQRD > THRESH_LEFT)){
-          motor.speed(LEFT_MOTOR, 80); motor.speed(RIGHT_MOTOR, 100);
-          leftQRD = analogRead(LEFT_QRD);
-          rightQRD = analogRead(RIGHT_QRD);
-        }
-        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-      }
-      tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
-      if(!leftCourse) { /* TURN AROUND */
-        rightTurnToTape(menu, 1);
-      }
-      int countTo;
-      if(!leftCourse) {
-        countTo = 2;
-      } else {
-        countTo = 1;
-      }
-      /* NAVIGATE TO ZIPLINE TICK MARK */
-      for (int i = 0; i < countTo; i = i + 1) {
-        circleFollow(menu, 2); //TODO change this
-      }
-      lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
-
-    } break;
-    
+  /* call the course code */
+  if (leftCourse){
+    LCD.print(" running LHS"); 
+    leftHandCourse(); 
+  } else { 
+    LCD.print("running RHS");
+    rightHandCourse(); 
   }
 
-  getUserInput();
-    
-}
-
-void getUserInput() {
+  /* set motors to neutral positions */
   motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-  
+  RCServo1.write(10);
+  analogWrite(37,0);
+
+  /* get left or right course */
+  LCD.clear(); LCD.home();
+  LCD.print("<stop> for LHS");
+  LCD.setCursor(0,1);
+  LCD.print("<start> for RHS");
   while (true) {
-    /* use TOP_POT to toggle options, press START to select current option */
-    command = knob(TOP_POT) * 9 / 1024;
-    LCD.clear(); LCD.home();
-    LCD.print("Press START to...");
-    LCD.setCursor(0,1);
-    switch (command) {
-      case 0: { LCD.print("RUN FULL COURSE"); } break;
-      case 1: { LCD.print("TAPE FOLLOW"); } break;
-      case 2: { LCD.print("CIRCLE FOLLOW"); } break;
-      case 3: { LCD.print("TEST ARM"); } break;
-      case 4: { LCD.print("GATE STAGE"); } break;
-      case 5: { LCD.print("RAMP STAGE"); } break;
-      case 6: { LCD.print("TANK STAGE"); } break;
-      case 7: { LCD.print("LINE STAGE"); } break;
-      case 8: { LCD.print("MISC TEST"); } break;
-    }
-    if (startbutton()) {
-      delay(100); if (startbutton()) { break; }
-    }
-    delay(100);
-  }
-  
-  if (command == 0 || command == 5) {
-    while (true) {
-      /* use TOP_POT to toggle options, press START to select current option */
-      leftCourse = 1 - knob(TOP_POT) * 2 / 1024;
-      LCD.clear(); LCD.home();
-      LCD.print("Using surface...");
-      LCD.setCursor(0,1);
-      if (leftCourse) {
-        LCD.print("LEFT COURSE");
-      } else {
-        LCD.print("RIGHT COURSE");
-      }
-      if (startbutton()) {
-        delay(100); if (startbutton()) { break; }
-      }
+    if (stopbutton()){
       delay(100);
+      if (stopbutton()){
+        leftCourse = true;
+        break;
+      }
+    }
+    if (startbutton()){
+      delay(100);
+      if (startbutton()){
+        leftCourse = false;
+        break;
+      }
     }
   }
+
+}
+
+/*
+ * 
+ * RUN THE FULL COURSE ON THE LEFT HAND SURFACE
+ * 
+ */
+void leftHandCourse(){
+  
+  /* detect gate IR */
+  gateStage();
+  
+  /* detect top of ramp and circle*/
+  rampStage();
+
+  /* turn onto circle */
+  driveForward(460.0);
+  rightTurnToTape(menu, 1);
+  leftQRD = analogRead(LEFT_QRD);
+  rightQRD = analogRead(RIGHT_QRD);
+  rightTurn(menu, 300.0);
+  while(!(leftQRD > menu->thresh)){
+    motor.speed(LEFT_MOTOR, 80); motor.speed(RIGHT_MOTOR, 100);
+    leftQRD = analogRead(LEFT_QRD);
+    rightQRD = analogRead(RIGHT_QRD);
+  }
+  motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+
+  /* skip first 5 ticks to get to first agent */
+  int skipTicks = 5;
+  for (int i = 0; i < skipTicks; i = i + 1){
+    circleFollow(menu);
+  }
+
+  /* go around tank and collect agents */
+  tankStage();
+
+  /* go to tick to start zipline escape */
+  int countTo = 2;
+  for (int i = 0; i < countTo; i = i + 1){
+    circleFollow(menu);
+  }
+
+  /* drive basket onto zipline */
+  lineStage();
   
 }
 
+/*
+ * 
+ * RUN THE FULL COURSE ON THE RIGHT HAND SURFACE
+ * 
+ */
+void rightHandCourse(){
+
+  /* detect gate IR */
+  gateStage();
+  
+  /* detect top of ramp and circle*/
+  rampStage();
+
+  /* turn onto circle */
+  driveForward(350.0);
+  rightTurnToTape(menu, 1);
+  motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+
+  /* go around tank and collect agents */
+  tankStage();
+
+  /* turn around */
+  rightTurnToTape(menu, 1);
+
+  /* go to tick to start zipline escape */
+  int countTo = 2;
+  for (int i = 0; i < countTo; i = i + 1){
+    clockwiseCircleFollow(menu);
+  }
+
+  /* drive basket onto zipline */
+  lineStage();
+  
+}
+
+/*
+ * 
+ * STOP FOR THE IR GATE
+ * 
+ */
 void gateStage() { 
   
   bool gateStage = true;
@@ -211,6 +189,11 @@ void gateStage() {
   
 }
 
+/*
+ * 
+ * RECOGNIZE THE TOP OF THE RAMP AND THE START OF THE CIRCLE
+ * 
+ */
 void rampStage() {
   
   bool gateStage = false;
@@ -218,14 +201,14 @@ void rampStage() {
   
 }
 
+/*
+ * 
+ * COLLECT THE AGENTS AROUND THE CIRCLE
+ * 
+ */
 void tankStage() {
 
-  int maxTickCount;
-  if(!leftCourse) {
-    maxTickCount = 6;
-  } else {
-    maxTickCount = 7;
-  }
+  int maxTickCount = 6;
   
   for(int tickCount = 1; tickCount <= maxTickCount; tickCount++) {
 
@@ -236,40 +219,30 @@ void tankStage() {
       if (switch0 == 0) { break; } 
     }
 
-//    bool skipTick = skipTickBool(tickCount);
-//    LCD.clear(); LCD.home();
-//    LCD.print("Skip Tick? "); LCD.print(skipTick);
-//    delay(2000);
-
     /* GO TO NEXT TICK */
-    circleFollow(menu, tickCount); 
+    circleFollow(menu);
     delay(500);
 
-//    if (!skipTick){
     /* PICK UP AGENT */
-    if (tickCount != 1){
-      raiseArm();
-      delay(100);
-      closePincer();
-      delay(500);
-      lowerArm();
-      delay(500);
-      openPincer();
-    }
-//    }
+    raiseArm();
+    delay(100);
+    closePincer();
+    delay(500);
+    lowerArm();
+    delay(500);
+    openPincer();
     
   }
   
 }
 
-
+/*
+ * 
+ * GET BASKET ONTO THE ZIPLINE
+ * 
+ */
 void lineStage() {
   
-//  if(leftCourse) {
-//    rightTurn(menu, 400.0); driveForward(150.0); leftTurn(menu, 350.0);
-//  } else {
-//    leftTurn(menu, 400.0); driveForward(150.0); rightTurn(menu, 350.0);
-//  }
   driveForward(1800.0);
   delay(1000);
   raiseArm(); /* GET ARM OUT OF THE WAY */
@@ -282,18 +255,3 @@ void lineStage() {
   lowerArm();
   
 }
-
-
-bool skipTickBool(int tickCount) {
-  
-    unsigned long firstDropTime = 60000.0;
-
-    if((millis() - start) > (firstDropTime + 5.0 * (unsigned long) tickCount)) {
-      return true;
-    } else {
-      return false;
-    }
-    
-}
-
-
