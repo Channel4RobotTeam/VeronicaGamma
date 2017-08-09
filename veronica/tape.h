@@ -44,13 +44,15 @@ void tapeFollow(Menu* menu, bool gateStage) {
   bool topOfRamp = false;
   
   unsigned long startTime = millis();
-  unsigned long reachedTopOfRamp = millis();
+  unsigned long reachedTopOfRamp;
   
   int proportional = 0;
   int derivative = 0;
+  int currErr = 0;
   
   /* MAIN LOOP */
   while (true) {
+    int startLoop = millis();
     currCount = currCount + 1;
     displayCount = displayCount + 1;
     
@@ -68,15 +70,42 @@ void tapeFollow(Menu* menu, bool gateStage) {
     sideRightQRD = analogRead(SIDE_RIGHT_QRD);
 
     /* ERROR */
-    int currErr = tapeError(menu, rightQRD, leftQRD, lastErr);
+   if(leftQRD > menu->thresh_left && rightQRD > menu->thresh_right) {
+      currErr = 0;
+   }
+   if (leftQRD < menu->thresh_left && rightQRD > menu->thresh_right) { /* SLIGHTLY LEFT OF TAPE */ 
+      currErr = -1;
+    } 
+    else if (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right) { /* SLIGHTLY RIGHT OF TAPE */ 
+      currErr = 1; 
+    } 
+    else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right) { /* COMPLETELY OFF TAPE */
+      if (lastErr < 0) { // OFF TO LEFT
+        currErr = -3; 
+      } 
+      else if(lastErr > 0) { // OFF TO RIGHT
+        currErr = 3; 
+      }
+    }
     
     /* CORRECTION CALCULATION */
     proportional = currErr * menu->kp;
-    derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd;
-    int correction = proportional + derivative;
+//    derivative = ((currErr - lastErr) / (currCount - lastCount)) * menu->kd;
+    int correction = proportional; // + derivative;
 
     /* CORRECTION APPLICATION */
-    correctionApplication(menu, correction);
+    if (menu->velocity + correction < 0 || menu->velocity - correction < 0) {
+      if (correction < 0) {
+        motor.speed(LEFT_MOTOR, menu->velocity - correction);
+        motor.speed(RIGHT_MOTOR, 0);
+      } else {
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, menu->velocity + correction);
+      }
+    } else {
+      motor.speed(LEFT_MOTOR, menu->velocity - correction);
+      motor.speed(RIGHT_MOTOR, menu->velocity + correction);
+    }
 
     if (gateStage) { /* GATE STAGE */
       
@@ -105,37 +134,41 @@ void tapeFollow(Menu* menu, bool gateStage) {
         reachedTopOfRamp = millis();
       }
 
-      if (topOfRamp && millis() - reachedTopOfRamp > 300.0){
+      if (topOfRamp && (millis() - reachedTopOfRamp) > 250.0){
         menu->velocity = 150; /* lower the speed for tape following around top */
+//        leftTurnToTape(menu, 1);
       }
 
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
-      if(topOfRamp && sideRightQRD > menu->thresh_sideRight) {
+      if(topOfRamp && sideRightQRD > menu->thresh_sideRight && (millis() - reachedTopOfRamp) > 2000.0) {
         motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
         LCD.clear(); LCD.home();
-        LCD.print("TANK");
+        LCD.print("TANK"); 
         LCD.setCursor(0, 1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
         break;
       }
       
-      if (displayCount == 30 && topOfRamp) {
+      if (displayCount == 300 && topOfRamp) {
         LCD.clear(); LCD.home(); 
-        LCD.print("TOP OF RAMP");
+        LCD.print("RAMP TOP  "); LCD.print((millis()/1000) - reachedTopOfRamp);
         LCD.setCursor(0,1); LCD.print("SR: "); LCD.print(analogRead(SIDE_RIGHT_QRD));
         displayCount = 0; /* RESET */
       }
     }
     
     /* PRINTS INPUTS AND OUTPUTS */
-    if(displayCount == 30 && !topOfRamp) {
+    if(displayCount == 300 && !topOfRamp) {
 //      /* FOR DEBUGGING THE QRDs */
       printQRDs();
 //        printFreq();
-//      /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
-////      LCD.clear(); LCD.home();
-////      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
-////      LCD.setCursor(0,1);
-////      LCD.print("Count: "); LCD.print(currCount);
+      /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
+//      LCD.clear(); LCD.home();
+//      LCD.print("L: "); LCD.print(analogRead(LEFT_QRD) > menu->thresh_left); LCD.print(" R: "); LCD.print(analogRead(RIGHT_QRD) > menu->thresh_right);
+//      LCD.setCursor(0,1);
+//      LCD.print("loop time: "); LCD.print((millis() - startLoop));
+//      Serial.print("loop time: "); Serial.println(millis() - startLoop);
+//      Serial.print("left: "); Serial.print(analogRead(LEFT_QRD) > menu->thresh_left);
+
       displayCount = 0; /* RESET */
     }
 
@@ -264,6 +297,7 @@ void circleFollow(Menu* menu, int tickCount) {
   
 }
 
+int tryTurn = 1;
 
 /*
  * 
@@ -272,18 +306,19 @@ void circleFollow(Menu* menu, int tickCount) {
  */
 int tapeError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
   int currentError = 0;
+  
   if (leftQRD < menu->thresh_left && rightQRD > menu->thresh_right) { /* SLIGHTLY LEFT OF TAPE */ 
-    currentError = -1;
+    currentError = -5;
   } 
   else if (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right) { /* SLIGHTLY RIGHT OF TAPE */ 
-    currentError = 1; 
+    currentError = 5; 
   } 
-  else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right){ /* COMPLETELY OFF TAPE */
+  else if (leftQRD < menu->thresh_left && rightQRD < menu->thresh_right) { /* COMPLETELY OFF TAPE */
     if (lastError < 0) { // OFF TO LEFT
-      currentError = -2; 
+      currentError = -10; 
     } 
     else if(lastError > 0) { // OFF TO RIGHT
-      currentError = 2; 
+      currentError = 10; 
     }
   }
 
@@ -307,21 +342,6 @@ int tankError(Menu* menu, int rightQRD, int leftQRD, int lastError) {
   }
 
   return currentError;
-}
-
-void correctionApplication(Menu* menu, int correction) {
-  if (menu->velocity + correction < 0 || menu->velocity - correction < 0) {
-    if (correction < 0) {
-      motor.speed(LEFT_MOTOR, menu->velocity - correction);
-      motor.speed(RIGHT_MOTOR, 0);
-    } else {
-      motor.speed(LEFT_MOTOR, 0);
-      motor.speed(RIGHT_MOTOR, menu->velocity + correction);
-    }
-  } else {
-    motor.speed(LEFT_MOTOR, menu->velocity - correction);
-    motor.speed(RIGHT_MOTOR, menu->velocity + correction);
-  }
 }
 
 void printQRDs() {
