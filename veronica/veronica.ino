@@ -67,8 +67,13 @@ void loop() {
       if(!leftCourse) { /* TURN AROUND */
         rightTurnToTape(menu, 1);
       }
-      int countTo = 1;
-      /* NAVIGATE TO SECOND TICK MARK */
+      int countTo;
+      if(!leftCourse) {
+        countTo = 2;
+      } else {
+        countTo = 1;
+      }
+      /* NAVIGATE TO ZIPLINE TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
         circleFollow(menu, 2); //TODO change this
       }
@@ -132,10 +137,15 @@ void loop() {
       if(!leftCourse) { /* TURN AROUND */
         rightTurnToTape(menu, 1);
       }
-      int countTo = 2;
-      /* NAVIGATE TO SECOND TICK MARK */
+      int countTo;
+      if(!leftCourse) {
+        countTo = 2;
+      } else {
+        countTo = 1;
+      }
+      /* NAVIGATE TO ZIPLINE TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
-        circleFollow(menu, 2);  //TODO change this 
+        circleFollow(menu, 2); //TODO change this
       }
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
 
@@ -209,8 +219,15 @@ void rampStage() {
 }
 
 void tankStage() {
+
+  int maxTickCount;
+  if(!leftCourse) {
+    maxTickCount = 6;
+  } else {
+    maxTickCount = 7;
+  }
   
-  for(int tickCount = 1; tickCount <= 7; tickCount++) {
+  for(int tickCount = 1; tickCount <= maxTickCount; tickCount++) {
 
     /* Press YELLOW RESET to switch to user input menu */
     int switch0 = digitalRead(YELLOWBUTTON);
@@ -249,9 +266,9 @@ void tankStage() {
 void lineStage() {
   
 //  if(leftCourse) {
-//    rightTurn(menu, 600.0); driveForward(200.0); leftTurn(menu, 550.0);
+//    rightTurn(menu, 400.0); driveForward(150.0); leftTurn(menu, 350.0);
 //  } else {
-//    leftTurn(menu, 600.0); driveForward(200.0); rightTurn(menu, 550.0);
+//    leftTurn(menu, 400.0); driveForward(150.0); rightTurn(menu, 350.0);
 //  }
   driveForward(1800.0);
   delay(1000);
