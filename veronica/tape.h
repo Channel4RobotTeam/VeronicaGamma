@@ -44,6 +44,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
   bool topOfRamp = false;
   
   unsigned long startTime = millis();
+  unsigned long reachedTopOfRamp = millis();
   
   int proportional = 0;
   int derivative = 0;
@@ -101,6 +102,11 @@ void tapeFollow(Menu* menu, bool gateStage) {
       /* RECOGNIZE WHEN THE TOP OF THE RAMP IS REACHED */
       if (digitalRead(RAMP_SWITCH) == 0) {
         topOfRamp = true;
+        reachedTopOfRamp = millis();
+      }
+
+      if (topOfRamp && millis() - reachedTopOfRamp > 300.0){
+        menu->velocity = 150; /* lower the speed for tape following around top */
       }
 
       /* RECOGNIZE WHEN THE CIRCLE IS REACHED AND TURN ONTO IT */
@@ -145,7 +151,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
  * FOLLOW THE OUTSIDE OF THE CIRCLE
  * 
  */
-void circleFollow(Menu* menu) {
+void circleFollow(Menu* menu, int tickCount) {
 
   /* INITIALIZE VARIABLES */
   int currCount = 0;
@@ -219,20 +225,22 @@ void circleFollow(Menu* menu) {
       LCD.print("AT TICK MARK");
 
       /* LINE UP WITH TOY FOR ARM */
-      LCD.setCursor(0,1);
-      LCD.print("CORRECTING");
-      leftQRD = analogRead(LEFT_QRD);
-      rightQRD = analogRead(RIGHT_QRD);
-      unsigned long startCorr = millis();
-      while (!(leftQRD > thresh && rightQRD < thresh)){
+      if (tickCount != 1){
+        LCD.setCursor(0,1);
+        LCD.print("CORRECTING");
         leftQRD = analogRead(LEFT_QRD);
         rightQRD = analogRead(RIGHT_QRD);
-        motor.speed(LEFT_MOTOR, 0);
-        motor.speed(RIGHT_MOTOR, motorSpeed + 45);
-        currCount = currCount + 1;
+        unsigned long startCorr = millis();
+        while (!(leftQRD > thresh && rightQRD < thresh)){
+          leftQRD = analogRead(LEFT_QRD);
+          rightQRD = analogRead(RIGHT_QRD);
+          motor.speed(LEFT_MOTOR, 0);
+          motor.speed(RIGHT_MOTOR, motorSpeed + 45);
+          currCount = currCount + 1;
+        }
+        backUp(400.0);
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0); /* PAUSE -- ARM MOVEMENTS WOULD GO HERE */
       }
-      backUp(400.0);
-      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0); /* PAUSE -- ARM MOVEMENTS WOULD GO HERE */
         
       sawLastTick = currCount;  
 

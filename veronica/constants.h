@@ -34,7 +34,7 @@
 #define LINE_STAGE 3
 
 /* DEFAULTS MENU VALUES */
-#define VELOCITY 150
+#define VELOCITY 186
 #define KP 51
 #define KI 5
 #define KD 81

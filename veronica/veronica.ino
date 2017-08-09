@@ -63,7 +63,7 @@ void loop() {
       int countTo = 2;
       /* NAVIGATE TO SECOND TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
-        circleFollow(menu); 
+        circleFollow(menu, i); //TODO change this
       }
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
       
@@ -73,7 +73,7 @@ void loop() {
     
     case 2: { /* CIRCLE FOLLOW */
       while(true) {
-        circleFollow(menu); 
+        circleFollow(menu, 2); //TODO change this 
         if (digitalRead(0) == 0) { 
           delay(1000); 
           if (digitalRead(0) == 0) { break; } 
@@ -108,29 +108,18 @@ void loop() {
         driveForward(350.0);
         rightTurnToTape(menu, 1);
       } else {
+        /* CORRECT ONTO CIRCLE */
         driveForward(460.0);
-        /*amber*/
-        int leftQRD = analogRead(LEFT_QRD);
-        int rightQRD = analogRead(RIGHT_QRD);
-        unsigned long thisStart = millis();
         rightTurnToTape(menu, 1);
-        backUp(750.0);
         leftQRD = analogRead(LEFT_QRD);
         rightQRD = analogRead(RIGHT_QRD);
-        while (!(leftQRD > THRESH_LEFT && rightQRD < THRESH_RIGHT)){
+        rightTurn(menu, 300.0);
+        while(!(leftQRD > THRESH_LEFT)){
+          motor.speed(LEFT_MOTOR, 80); motor.speed(RIGHT_MOTOR, 100);
           leftQRD = analogRead(LEFT_QRD);
           rightQRD = analogRead(RIGHT_QRD);
-          motor.speed(LEFT_MOTOR, 0);
-          motor.speed(RIGHT_MOTOR, 125);
         }
-        backUp(400.0);
         motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-        /*amber*/
-//        motor.speed(LEFT_MOTOR, 135); motor.speed(RIGHT_MOTOR, -145);
-//        delay(850);
-//        rightTurnToTape(menu, 1);
-//        backUp(500.0);
-//        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       }
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       if(!leftCourse) { /* TURN AROUND */
@@ -139,7 +128,7 @@ void loop() {
       int countTo = 2;
       /* NAVIGATE TO SECOND TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
-        circleFollow(menu); 
+        circleFollow(menu, 2);  //TODO change this 
       }
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
 
@@ -229,11 +218,12 @@ void tankStage() {
 //    delay(2000);
 
     /* GO TO NEXT TICK */
-    circleFollow(menu); 
+    circleFollow(menu, tickCount); 
     delay(500);
 
 //    if (!skipTick){
     /* PICK UP AGENT */
+    if (tickCount != 1){
       raiseArm();
       delay(100);
       closePincer();
@@ -241,6 +231,7 @@ void tankStage() {
       lowerArm();
       delay(500);
       openPincer();
+    }
 //    }
     
   }
