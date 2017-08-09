@@ -94,7 +94,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
         
         motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       }
-      if(analogRead(ONEKHZ) > 280) {
+      if(analogRead(ONEKHZ) > 85) {
         break;
       }
     } else { /* RAMP STAGE */
@@ -129,8 +129,8 @@ void tapeFollow(Menu* menu, bool gateStage) {
     /* PRINTS INPUTS AND OUTPUTS */
     if(displayCount == 30 && !topOfRamp) {
 //      /* FOR DEBUGGING THE QRDs */
-//      printQRDs();
-        printFreq();
+      printQRDs();
+//        printFreq();
 //      /* FOR DEBUGGING THE CURRENT COUNT (AND FRONT QRDS) FOR RECOGNIZING TOP OF RAMP*/
 ////      LCD.clear(); LCD.home();
 ////      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);

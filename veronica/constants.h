@@ -34,8 +34,8 @@
 #define LINE_STAGE 3
 
 /* DEFAULTS MENU VALUES */
-#define VELOCITY 186
-#define KP 51
+#define VELOCITY 200 /*RIGHT COURSE*/ /*186 LEFT COURSE*/ 
+#define KP 55 //51
 #define KI 5
 #define KD 81
 #define KP_CIRCLE 40
@@ -47,4 +47,4 @@
 #define THRESH_FRONT 900
 #define THRESH_ONEKHZ 900
 #define THRESH_TENKHZ 300
-#define THRESH_SIDE_RIGHT 650
+#define THRESH_SIDE_RIGHT 700

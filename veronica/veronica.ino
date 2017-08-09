@@ -50,20 +50,27 @@ void loop() {
         driveForward(350.0);
         rightTurnToTape(menu, 1);
       } else {
-        driveForward(300.0);
-        motor.speed(LEFT_MOTOR, 35); motor.speed(RIGHT_MOTOR, -155);
-        delay(900);
-        rightTurnToTape(menu, 2);
-        backUp(500.0);
+        /* CORRECT ONTO CIRCLE */
+        driveForward(460.0);
+        rightTurnToTape(menu, 1);
+        leftQRD = analogRead(LEFT_QRD);
+        rightQRD = analogRead(RIGHT_QRD);
+        rightTurn(menu, 300.0);
+        while(!(leftQRD > THRESH_LEFT)){
+          motor.speed(LEFT_MOTOR, 80); motor.speed(RIGHT_MOTOR, 100);
+          leftQRD = analogRead(LEFT_QRD);
+          rightQRD = analogRead(RIGHT_QRD);
+        }
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       }
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       if(!leftCourse) { /* TURN AROUND */
         rightTurnToTape(menu, 1);
       }
-      int countTo = 2;
+      int countTo = 1;
       /* NAVIGATE TO SECOND TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
-        circleFollow(menu, i); //TODO change this
+        circleFollow(menu, 2); //TODO change this
       }
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
       
@@ -203,7 +210,7 @@ void rampStage() {
 
 void tankStage() {
   
-  for(int tickCount = 1; tickCount <= 6; tickCount++) {
+  for(int tickCount = 1; tickCount <= 7; tickCount++) {
 
     /* Press YELLOW RESET to switch to user input menu */
     int switch0 = digitalRead(YELLOWBUTTON);
@@ -241,20 +248,20 @@ void tankStage() {
 
 void lineStage() {
   
-  if(leftCourse) {
-    rightTurn(menu, 600.0); driveForward(200.0); leftTurn(menu, 550.0);
-  } else {
-    leftTurn(menu, 600.0); driveForward(200.0); rightTurn(menu, 550.0);
-  }
+//  if(leftCourse) {
+//    rightTurn(menu, 600.0); driveForward(200.0); leftTurn(menu, 550.0);
+//  } else {
+//    leftTurn(menu, 600.0); driveForward(200.0); rightTurn(menu, 550.0);
+//  }
   driveForward(1800.0);
   delay(1000);
   raiseArm(); /* GET ARM OUT OF THE WAY */
   delay(1000);
   raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
   delay(2000);
-  driveForward(2000.0); /* DRIVES THE BASKET ONTO THE ZIPLINE */
+  driveForward(1800.0); /* DRIVES THE BASKET ONTO THE ZIPLINE */
   lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
-  backUp(5900.0); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
+  backUp(5700.0); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
   lowerArm();
   
 }
