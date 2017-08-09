@@ -81,7 +81,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
       
       /* STAY STOPPED WHILE THE ALARM IS ON */
       int j = 0;
-      while(analogRead(ONEKHZ) < 180) {
+      while(analogRead(ONEKHZ) < 30) {
         j = j + 1;
         
         if(j == 30) {
@@ -93,7 +93,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
         
         motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       }
-      if(analogRead(ONEKHZ) > 900) {
+      if(analogRead(ONEKHZ) > 280) {
         break;
       }
     } else { /* RAMP STAGE */
@@ -121,7 +121,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
     }
     
     /* PRINTS INPUTS AND OUTPUTS */
-//    if(displayCount == 30 && !topOfRamp) {
+    if(displayCount == 30 && !topOfRamp) {
 //      /* FOR DEBUGGING THE QRDs */
 //      printQRDs();
         printFreq();
@@ -130,8 +130,8 @@ void tapeFollow(Menu* menu, bool gateStage) {
 ////      LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
 ////      LCD.setCursor(0,1);
 ////      LCD.print("Count: "); LCD.print(currCount);
-//      displayCount = 0; /* RESET */
-//    }
+      displayCount = 0; /* RESET */
+    }
 
     lastErr = currErr;
     lastCount = currCount;
@@ -145,7 +145,7 @@ void tapeFollow(Menu* menu, bool gateStage) {
  * FOLLOW THE OUTSIDE OF THE CIRCLE
  * 
  */
-void circleFollow(Menu* menu){
+void circleFollow(Menu* menu) {
 
   /* INITIALIZE VARIABLES */
   int currCount = 0;
@@ -327,6 +327,6 @@ void printFreq() {
   LCD.clear(); LCD.home();
   LCD.print("L: "); LCD.print(analogRead(LEFT_QRD)); LCD.print(" R: "); LCD.print(analogRead(RIGHT_QRD));
   LCD.setCursor(0,1);
-  LCD.print("1: "); LCD.print(analogRead(ONEKHZ)); LCD.print(" 10: "); LCD.print(analogRead(TENKHZ));  
+  LCD.print("1: "); LCD.print(analogRead(ONEKHZ)); LCD.print(" 10: "); LCD.print(analogRead(TENKHZ)); LCD.print(" "); LCD.print(digitalRead(RAMP_SWITCH));  
 }
 

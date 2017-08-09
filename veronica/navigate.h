@@ -94,8 +94,7 @@ void rightTurnToTape(Menu* menu, int occurrences) {
       displayCount = 0;
     }
     
-    motor.speed(LEFT_MOTOR, VELOCITY-70);
-    motor.speed(RIGHT_MOTOR, 25);
+    motor.speed(LEFT_MOTOR, 135); motor.speed(RIGHT_MOTOR, -145);
 
     if(count > 1000 && (leftQRD > menu->thresh_left && rightQRD < menu->thresh_right)) {
       tapeCount = tapeCount + 1;

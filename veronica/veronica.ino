@@ -47,30 +47,24 @@ void loop() {
       gateStage();  /* GO FROM START TO START OF TANK */
       rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
       if(!leftCourse) {
-        driveForward(400.0);
+        driveForward(350.0);
         rightTurnToTape(menu, 1);
       } else {
-        driveForward(400.0);
-        motor.speed(LEFT_MOTOR, 35); motor.speed(RIGHT_MOTOR, -115);
-        delay(1000);
+        driveForward(300.0);
+        motor.speed(LEFT_MOTOR, 35); motor.speed(RIGHT_MOTOR, -155);
+        delay(900);
         rightTurnToTape(menu, 2);
+        backUp(500.0);
       }
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       if(!leftCourse) { /* TURN AROUND */
         rightTurnToTape(menu, 1);
-        rightTurnToTape(menu, 1);
-        rightTurnToTape(menu, 1);
       }
       int countTo = 2;
-//      if(leftCourse) { countTo = 2; }
-//      else { countTo = 4; }
-      /* NAVIGATE TO SECOND OR FOURTH TICK MARK */
+      /* NAVIGATE TO SECOND TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
         circleFollow(menu); 
       }
-//      if(!leftCourse) {
-//        rightTurn(menu, 5000.0);
-//      }
       lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
       
     } break;
@@ -107,13 +101,43 @@ void loop() {
 
     case 8: { /* MISC TEST */ 
         
+      start = millis();
+
+      rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
+      if(!leftCourse) {
+        driveForward(350.0);
+        rightTurnToTape(menu, 1);
+      } else {
+        driveForward(460.0);
+        /*amber*/
+        int leftQRD = analogRead(LEFT_QRD);
+        int rightQRD = analogRead(RIGHT_QRD);
+        unsigned long thisStart = millis();
+        rightTurnToTape(menu, 1);
+        backUp(750.0);
+        leftQRD = analogRead(LEFT_QRD);
+        rightQRD = analogRead(RIGHT_QRD);
+        while (!(leftQRD > THRESH_LEFT && rightQRD < THRESH_RIGHT)){
+          leftQRD = analogRead(LEFT_QRD);
+          rightQRD = analogRead(RIGHT_QRD);
+          motor.speed(LEFT_MOTOR, 0);
+          motor.speed(RIGHT_MOTOR, 125);
+        }
+        backUp(400.0);
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+        /*amber*/
+//        motor.speed(LEFT_MOTOR, 135); motor.speed(RIGHT_MOTOR, -145);
+//        delay(850);
+//        rightTurnToTape(menu, 1);
+//        backUp(500.0);
+//        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+      }
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       if(!leftCourse) { /* TURN AROUND */
         rightTurnToTape(menu, 1);
-        rightTurnToTape(menu, 1);
-        rightTurnToTape(menu, 1);
       }
       int countTo = 2;
+      /* NAVIGATE TO SECOND TICK MARK */
       for (int i = 0; i < countTo; i = i + 1) {
         circleFollow(menu); 
       }
@@ -225,11 +249,13 @@ void tankStage() {
 
 
 void lineStage() {
-   
-//  locateZipline(); /* TRAVELS TOWARDS ZIPLINE FROM APPROPRIATE TICK MARK */
-//  driveForward(2300.0); /* DRIVES FORWARD A HARDCODED DISTANCE TO ZIPLINE */
-  rightTurn(menu, 600.0); driveForward(200.0); leftTurn(menu, 550.0);
-  driveForward(1500.0);
+  
+  if(leftCourse) {
+    rightTurn(menu, 600.0); driveForward(200.0); leftTurn(menu, 550.0);
+  } else {
+    leftTurn(menu, 600.0); driveForward(200.0); rightTurn(menu, 550.0);
+  }
+  driveForward(1800.0);
   delay(1000);
   raiseArm(); /* GET ARM OUT OF THE WAY */
   delay(1000);
