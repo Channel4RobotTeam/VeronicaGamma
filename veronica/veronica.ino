@@ -47,7 +47,7 @@ void loop() {
 //      gateStage();  /* GO FROM START TO START OF TANK */
       rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
       if(!leftCourse) {
-        driveForward(1600.0);
+        driveForward(2500.0);
         int leftQRD = analogRead(LEFT_QRD);
         int rightQRD = analogRead(RIGHT_QRD);
         while(!(leftQRD > THRESH_LEFT && rightQRD < THRESH_RIGHT)){
