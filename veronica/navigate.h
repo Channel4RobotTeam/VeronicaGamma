@@ -63,6 +63,56 @@ void locateZipline() {
 
 /* 
  *  
+ *  Continues to turn left until robot sees tape 
+ *  
+ */
+void leftTurnToTape(Menu* menu, int occurrences) {
+  
+  int displayCount = 0;
+  int count = 0;
+  int tapeCount = 0;
+  
+  while(true) {
+    count = count + 1;
+    
+    /* Press YELLOW RESET to switch to user input menu */
+    int switch0 = digitalRead(0);
+    if (switch0 == 0) { 
+      delay(1000); 
+      if (switch0 == 0) { break; } 
+    }
+    
+    /* INPUTS */
+    int leftQRD = analogRead(LEFT_QRD);
+    int rightQRD = analogRead(RIGHT_QRD);
+    
+    displayCount = displayCount + 1;
+    if(displayCount == 30) {
+      LCD.clear(); LCD.home();
+      LCD.print("LEFT TURN");
+      LCD.setCursor(0,1); LCD.print("L: "); LCD.print(leftQRD); LCD.print(" R: "); LCD.print(rightQRD);
+      displayCount = 0;
+    }
+    
+    motor.speed(LEFT_MOTOR, -145); motor.speed(RIGHT_MOTOR, 135);
+
+    if(count > 1000 && (leftQRD > menu->thresh_left || rightQRD > menu->thresh_right)) {
+      tapeCount = tapeCount + 1;
+      if(tapeCount >= occurrences) {
+        count = 0;
+        motor.speed(LEFT_MOTOR, 0);
+        motor.speed(RIGHT_MOTOR, 0);
+        break;
+      }
+    }
+  }
+  
+}
+
+
+
+/* 
+ *  
  *  Continues to turn right until robot sees tape 
  *  
  */
@@ -141,8 +191,8 @@ void driveForward(unsigned long duration) {
   unsigned long start = millis();
 
   while(millis() - start < duration) {
-    motor.speed(LEFT_MOTOR, VELOCITY - 25);
-    motor.speed(RIGHT_MOTOR, VELOCITY - 25);
+    motor.speed(LEFT_MOTOR, 125);
+    motor.speed(RIGHT_MOTOR, 125);
   }
 
   motor.speed(LEFT_MOTOR, 0);
