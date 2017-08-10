@@ -44,11 +44,20 @@ void loop() {
 
       start = millis();
 
-      gateStage();  /* GO FROM START TO START OF TANK */
+//      gateStage();  /* GO FROM START TO START OF TANK */
       rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
       if(!leftCourse) {
-        driveForward(650.0);
-        rightTurnToTape(menu, 1);
+        driveForward(1600.0);
+        int leftQRD = analogRead(LEFT_QRD);
+        int rightQRD = analogRead(RIGHT_QRD);
+        while(!(leftQRD > THRESH_LEFT && rightQRD < THRESH_RIGHT)){
+          motor.speed(LEFT_MOTOR, 80);
+          motor.speed(RIGHT_MOTOR, 0);
+          leftQRD = analogRead(LEFT_QRD);
+          rightQRD = analogRead(RIGHT_QRD);
+        }
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+        delay(1000);       
       } else {
         /* CORRECT ONTO CIRCLE */
         driveForward(460.0);
@@ -66,7 +75,9 @@ void loop() {
       tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
       if(!leftCourse) { /* TURN AROUND */
         rightTurnToTape(menu, 1);
+        delay(2000);
         rightTurnToTape(menu, 1);
+        delay(2000);
       }
       if(!leftCourse) {
         /* go to tick to start zipline escape */
@@ -97,6 +108,7 @@ void loop() {
     } break; 
     
     case 3: { /* TEST ARM */
+      
       raiseArm();
       delay(500);
       closePincer();
@@ -104,6 +116,7 @@ void loop() {
       lowerArm();
       delay(1000);
       openPincer();
+      
     } break; 
     
     case 4: { gateStage(); } break; /* GATE STAGE */
@@ -115,44 +128,11 @@ void loop() {
     case 7: { lineStage(); } break; /* LINE STAGE */
 
     case 8: { /* MISC TEST */ 
+     
+      motor.speed(LEFT_MOTOR, 100); motor.speed(RIGHT_MOTOR, 120);
+      delay(4000);
+      motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
       
-      start = millis();
-
-      rampStage(); /* GO THROUGH GATE, UP RAMP, UP TO TANK*/
-      if(!leftCourse) {
-        driveForward(470.0);
-        rightTurnToTape(menu, 1);
-      } else {
-        /* CORRECT ONTO CIRCLE */
-        driveForward(460.0);
-        rightTurnToTape(menu, 1);
-        leftQRD = analogRead(LEFT_QRD);
-        rightQRD = analogRead(RIGHT_QRD);
-        rightTurn(menu, 300.0);
-        while(!(leftQRD > THRESH_LEFT)){
-          motor.speed(LEFT_MOTOR, 80); motor.speed(RIGHT_MOTOR, 100);
-          leftQRD = analogRead(LEFT_QRD);
-          rightQRD = analogRead(RIGHT_QRD);
-        }
-        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
-      }
-      tankStage(); /* GO AROUND TANK AND COLLECT AGENTS */
-      if(!leftCourse) { /* TURN AROUND */
-        rightTurnToTape(menu, 1);
-        rightTurnToTape(menu, 1);
-      }
-      int countTo;
-      if(!leftCourse) {
-        countTo = 2;
-      } else {
-        countTo = 1;
-      }
-      /* NAVIGATE TO ZIPLINE TICK MARK */
-      for (int i = 0; i < countTo; i = i + 1) {
-        circleFollow(menu, 2); //TODO change this
-      }
-      lineStage(); /* NAVIGATE TO ZIPLINE AND DROP OFF BASKET */
-
     } break;
     
   }
@@ -223,8 +203,13 @@ void rampStage() {
 }
 
 void tankStage() {
-
-  int maxTickCount = 7;
+  
+  int maxTickCount = 0;
+  if (leftCourse){
+    maxTickCount = 7;
+  } else { 
+    maxTickCount = 6;
+  }
   
   for(int tickCount = 1; tickCount <= maxTickCount; tickCount++) {
 
@@ -235,18 +220,30 @@ void tankStage() {
       if (switch0 == 0) { break; } 
     }
 
-//    bool skipTick = skipTickBool(tickCount);
-//    LCD.clear(); LCD.home();
-//    LCD.print("Skip Tick? "); LCD.print(skipTick);
-//    delay(2000);
-
     /* GO TO NEXT TICK */
-    circleFollow(menu, tickCount); 
+    if (leftCourse){
+      circleFollow(menu, tickCount);
+    } else {
+      if (tickCount != 6){
+        circleFollow(menu, 2);
+      } else {
+        circleFollow(menu, 10);
+      }
+    }
     delay(500);
 
-//    if (!skipTick){
     /* PICK UP AGENT */
-    if (tickCount != 1){
+    if (leftCourse){
+      if (tickCount != 1){
+        raiseArm();
+        delay(100);
+        closePincer();
+        delay(500);
+        lowerArm();
+        delay(500);
+        openPincer();
+      }
+    } else {
       raiseArm();
       delay(100);
       closePincer();
@@ -255,7 +252,6 @@ void tankStage() {
       delay(500);
       openPincer();
     }
-//    }
     
   }
   
@@ -266,16 +262,29 @@ void lineStage() {
   
   if(leftCourse) {
     rightTurn(menu, 400.0); driveForward(150.0); leftTurn(menu, 350.0);
+    driveForward(1800.0);
   } else {
-    leftTurn(menu, 400.0); driveForward(150.0); rightTurn(menu, 350.0);
+    motor.speed(LEFT_MOTOR, 100); motor.speed(RIGHT_MOTOR, 125);
+    delay(2500);
+//    driveForward(2500.0);
+    motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
   }
-  driveForward(1800.0);
   delay(1000);
   raiseArm(); /* GET ARM OUT OF THE WAY */
   delay(1000);
   raiseLift(); /* RAISE THE LIFT WITH THE BASKET ON IT */
   delay(2000);
-  driveForward(1800.0); /* DRIVES THE BASKET ONTO THE ZIPLINE */
+  if (leftCourse){
+    motor.speed(LEFT_MOTOR, 100); motor.speed(RIGHT_MOTOR, 125);
+    delay(2000.0);
+  } else {
+    leftTurn(menu, 150.0);
+    motor.speed(LEFT_MOTOR, 100); motor.speed(RIGHT_MOTOR, 125);
+    delay(1000);
+    motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+//    driveForward(1700.0); /* DRIVES THE BASKET ONTO THE ZIPLINE */ 
+  }
+//  driveForward(1800.0); /* DRIVES THE BASKET ONTO THE ZIPLINE */
   lowerLift(); /* LOWERS THE LIFT TO RELEASE THE BASKET */
   backUp(5700.0); /* GETS OUT OF THE WAY OF THE BASKET'S DESCENT */
   lowerArm();

@@ -131,6 +131,17 @@ void tapeFollow(Menu* menu, bool gateStage) {
       /* RECOGNIZE WHEN THE TOP OF THE RAMP IS REACHED */
       if (digitalRead(RAMP_SWITCH) == 0) {
         topOfRamp = true;
+        driveForward(350.0);
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+        delay(1000);
+        int left = analogRead(LEFT_QRD); int right = analogRead(RIGHT_QRD);
+        while (!(right > menu->thresh_left && left > menu->thresh_right)){
+          motor.speed(LEFT_MOTOR, 0);
+          motor.speed(RIGHT_MOTOR, 125);
+          left = analogRead(LEFT_QRD); right = analogRead(RIGHT_QRD); 
+        }
+        motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0);
+        delay(1000);
         reachedTopOfRamp = millis();
       }
 
@@ -271,7 +282,9 @@ void circleFollow(Menu* menu, int tickCount) {
           motor.speed(RIGHT_MOTOR, motorSpeed + 45);
           currCount = currCount + 1;
         }
-        backUp(400.0);
+        if (tickCount != 10){
+          backUp(400.0);
+        }
         motor.speed(LEFT_MOTOR, 0); motor.speed(RIGHT_MOTOR, 0); /* PAUSE -- ARM MOVEMENTS WOULD GO HERE */
       }
         

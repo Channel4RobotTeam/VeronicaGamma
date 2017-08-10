@@ -253,12 +253,12 @@ void leftTurn(Menu* menu, unsigned long duration) {
     displayCount = displayCount + 1;
     if(displayCount == 30) {
       LCD.clear(); LCD.home();
-      LCD.print(" stat RIGHT TURN");
+      LCD.print(" stat LEFT TURN");
       displayCount = 0;
     }
     
-    motor.speed(LEFT_MOTOR, -70);
-    motor.speed(RIGHT_MOTOR, 70);
+    motor.speed(LEFT_MOTOR, -110);
+    motor.speed(RIGHT_MOTOR, 110);
   }
   
   motor.speed(LEFT_MOTOR, 0);
